@@ -8,7 +8,7 @@ class Config:
     """Application configuration."""
 
     # Flask settings
-    SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-dev-key")
+    FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "fallback-dev-key")
 
     # Upload settings
     UPLOAD_FOLDER = tempfile.gettempdir()

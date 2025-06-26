@@ -2,7 +2,7 @@
 
 import os
 from openair import parse_file
-from app.types.openair_types import convert_raw_airspace
+from model.openair_types import convert_raw_airspace
 from utils.geojson_converter import convert_airspace_to_geojson
 from utils.file_utils import get_default_airspace_path
 

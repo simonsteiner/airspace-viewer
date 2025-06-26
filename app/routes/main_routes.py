@@ -4,7 +4,7 @@ import json
 from flask import Blueprint, render_template, request, flash, redirect, url_for
 from services.airspace_service import get_airspace_service
 from utils.file_utils import allowed_file, get_secure_filepath, cleanup_temp_file
-from app.utils.airspace_colors import (
+from utils.airspace_colors import (
     get_legend_data,
     generate_javascript_colors,
     generate_complete_css,

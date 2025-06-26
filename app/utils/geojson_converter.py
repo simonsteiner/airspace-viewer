@@ -2,19 +2,19 @@
 
 import math
 from units import nautical_miles_to_meters
-from app.types.openair_types import (
+from model.openair_types import (
     Point,
     Arc,
     ArcSegment,
     PolygonGeometry,
     CircleGeometry,
 )
-from app.utils.airspace_colors import get_airspace_color
+from utils.airspace_colors import get_airspace_color
 
 
 def altitude_to_text(altitude):
     """Convert altitude object to human-readable text."""
-    from app.types.openair_types import Altitude, AltitudeType
+    from model.openair_types import Altitude, AltitudeType
 
     if isinstance(altitude, Altitude):
         return altitude.to_text()
@@ -48,7 +48,7 @@ def convert_airspace_to_geojson(airspaces, verbose=False):
                     print(
                         f"  Converting raw dict data with keys: {list(airspace_data.keys())}"
                     )
-                from app.types.openair_types import convert_raw_airspace
+                from model.openair_types import convert_raw_airspace
 
                 airspace = convert_raw_airspace(airspace_data)
             else:
