@@ -20,8 +20,10 @@ class Config:
     # Debug settings
     VERBOSE = False
 
-    # Default airspace file
-    DEFAULT_AIRSPACE_FILE = "examples/Switzerland.txt"
+    # Default airspace file - use absolute path from app directory
+    DEFAULT_AIRSPACE_FILE = os.path.join(
+        os.path.dirname(__file__), "examples", "Switzerland.txt"
+    )
 
 
 class DevelopmentConfig(Config):

@@ -18,14 +18,14 @@ def create_app(config_name=None):
         if config_name is None:
             config_name = os.environ.get("FLASK_ENV", "default")
 
-        from config import config
+        from .config import config
 
         app.config.from_object(config[config_name])
         logger.info(f"Configuration loaded: {config_name}")
 
         # Register blueprints
-        from routes.main_routes import main_bp
-        from routes.api_routes import api_bp
+        from .routes.main_routes import main_bp
+        from .routes.api_routes import api_bp
 
         app.register_blueprint(main_bp)
         app.register_blueprint(api_bp)
@@ -34,14 +34,14 @@ def create_app(config_name=None):
         # Initialize services on startup with error handling
         with app.app_context():
             try:
-                from services.airspace_service import get_airspace_service
+                from .services.airspace_service import get_airspace_service
 
                 service = get_airspace_service()
                 # Load default data on startup
                 service.load_airspace_data()
                 logger.info("Airspace service initialized successfully")
             except Exception as e:
-                logger.warning(f"Failed to initialize airspace service: {e}")
+                logger.error(f"Failed to initialize airspace service: {e}")
                 # Continue without failing - service can be initialized later
 
         logger.info("Application created successfully")
