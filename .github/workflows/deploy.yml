@@ -60,6 +60,7 @@ jobs:
         existing_bucket_name: ${{ env.EB_S3_BUCKET }}
         version_description: "Deployment from commit ${{ github.sha }}"
         wait_for_deployment: true
+        wait_for_environment_recovery: 120
     - name: Configure environment variables in Elastic Beanstalk
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
