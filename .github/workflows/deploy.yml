@@ -112,6 +112,34 @@ jobs:
             Namespace=aws:elasticbeanstalk:application:environment,OptionName=FLASK_SECRET_KEY,Value="$FLASK_SECRET_KEY" \
             Namespace=aws:elasticbeanstalk:application:environment,OptionName=FLASK_ENV,Value=production
 
+        # Wait for environment variables update to complete
+        echo "Waiting for environment variables update to complete..."
+        WAIT_COUNT=0
+        while [ "$ENV_STATUS" != "Ready" ]; do
+          if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+            echo "Error: Environment $EB_ENV_NAME did not become ready within 30 minutes after environment variables update"
+            echo "Current status: $ENV_STATUS"
+            exit 1
+          fi
+          
+          echo "Environment status: $ENV_STATUS - Waiting for environment to be ready..."
+          sleep 60
+          WAIT_COUNT=$((WAIT_COUNT + 1))
+          
+          ENV_STATUS=$(aws elasticbeanstalk describe-environments \
+            --application-name $EB_APP_NAME \
+            --environment-names $EB_ENV_NAME \
+            --query 'Environments[0].Status' \
+            --output text 2>/dev/null || echo "ERROR")
+            
+          if [ "$ENV_STATUS" = "ERROR" ]; then
+            echo "Error: Unable to check environment status"
+            exit 1
+          fi
+        done
+
+        echo "Environment is ready for version deployment"
+
         VERSION_LABEL="deploy-$(date +%Y%m%d%H%M%S)"
         aws s3 cp app.zip s3://$EB_S3_BUCKET/$VERSION_LABEL.zip
         aws elasticbeanstalk create-application-version \
@@ -119,6 +147,20 @@ jobs:
           --version-label $VERSION_LABEL \
           --source-bundle S3Bucket=$EB_S3_BUCKET,S3Key=$VERSION_LABEL.zip
 
+        # Final check before deployment
+        ENV_STATUS=$(aws elasticbeanstalk describe-environments \
+          --application-name $EB_APP_NAME \
+          --environment-names $EB_ENV_NAME \
+          --query 'Environments[0].Status' \
+          --output text 2>/dev/null || echo "ERROR")
+
+        if [ "$ENV_STATUS" != "Ready" ]; then
+          echo "Error: Environment $EB_ENV_NAME is not ready for deployment"
+          echo "Current status: $ENV_STATUS"
+          exit 1
+        fi
+
+        echo "Deploying new version..."
         aws elasticbeanstalk update-environment \
           --application-name $EB_APP_NAME \
           --environment-name $EB_ENV_NAME \
