@@ -43,7 +43,7 @@ python app.py
 
 - **Backend**: Flask web server with OpenAir file parsing
 - **Frontend**: Leaflet maps with Bootstrap UI
-- **Processing**: Server-side GeoJSON conversion vs original client-side WASM
+- **Data**: Server-side GeoJSON conversion for airspace visualization
 
 ## Usage
 
@@ -61,44 +61,43 @@ python app.py
 
 ## Deployment
 
-### AWS Elastic Beanstalk
+For AWS deployment using Free Tier resources, see the complete setup guide: **[AWS-SETUP.md](AWS-SETUP.md)**
 
-The project includes GitHub Actions for automatic deployment to AWS Elastic Beanstalk. For manual deployment:
+Quick deployment:
 
-1. **Update requirements.txt for production**:
+```bash
+# Update requirements for production
+pip freeze > requirements.txt
 
-   ```bash
-   # Activate your virtual environment
-   source .venv/bin/activate
-   
-   # Generate production requirements
-   pip freeze > requirements.txt
-   ```
+# One-time AWS setup
+./setup-aws-user.sh    # Create deployment user
+./aws-setup.sh         # Create AWS resources
 
-2. **Configure GitHub Secrets**: Set up the following secrets in your GitHub repository (Settings → Secrets and variables → Actions):
+# Check status anytime
+./check-aws-resources.sh         # Check main environment
+./check-aws-resources.sh list    # List all environments
+./check-aws-resources.sh cleanup # Clean terminated environments
 
-   - `AWS_ACCESS_KEY_ID`: AWS access key for deployment
-   - `AWS_SECRET_ACCESS_KEY`: AWS secret access key for deployment
-   - `AWS_REGION`: AWS region (e.g., `us-east-1`, `eu-west-1`)
-   - `EB_APP_NAME`: Elastic Beanstalk application name
-   - `EB_ENV_NAME`: Elastic Beanstalk environment name
-   - `EB_S3_BUCKET`: S3 bucket for storing deployment artifacts
-   - `FLASK_SECRET_KEY`: Secret key for Flask session security
+# Deploy
+git push origin main   # Deploy via GitHub Actions
+```
 
-3. **Deploy using GitHub Actions**: Push to the `main` branch to trigger automatic deployment
+**GitHub Secrets** (Settings → Secrets → Actions):
 
-4. **Manual deployment**: Use the AWS CLI or Elastic Beanstalk console with the `application.py` WSGI entry point
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`: Deployment user credentials
+- `FLASK_SECRET_KEY`: Flask session security
+
+**Update deploy.yml** with these parameters:
+
+- `AWS_REGION`: AWS region (e.g., `us-east-1`, `eu-west-1`)
+- `EB_APP_NAME`: Elastic Beanstalk application name
+- `EB_ENV_NAME`: Elastic Beanstalk environment name  
+- `EB_S3_BUCKET`: S3 bucket for storing deployment artifacts
 
 ### Development vs Production
 
-- **Development**: Use `pip install -e .` for editable installation
-- **Production**: Use `pip freeze > requirements.txt` to lock dependency versions for AWS deployment
-
-The GitHub Actions workflow automatically:
-
-- Installs dependencies from `requirements.txt`
-- Creates a deployment package excluding development files
-- Deploys to Elastic Beanstalk with environment variables
+- **Development**: Use `pip install -e .` for editable installation with local changes
+- **Production**: Use `pip freeze > requirements.txt` to lock dependency versions for deployment
 
 ## Dependencies
 

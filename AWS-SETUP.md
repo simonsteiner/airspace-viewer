@@ -5,8 +5,8 @@ Deploy the Airspace Viewer application to AWS using **Free Tier eligible** resou
 ## 📋 Prerequisites
 
 1. **AWS Account** with Free Tier eligibility
-2. **AWS Administrator Access** - You need an account or IAM user with `AdministratorAccess` policy
-3. **AWS CLI** installed and configured with admin credentials
+2. **AWS CLI** installed: [Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+3. **Administrator Access** - IAM user with `AdministratorAccess` policy
 
 ### Create Admin User
 
@@ -32,9 +32,6 @@ You must have AWS Administrator access to create the deployment user and resourc
 ### Install AWS CLI
 
 ```bash
-# Install AWS CLI
-# https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
-
 # verify installation
 aws --version
 
@@ -48,28 +45,63 @@ aws configure
 
 **Note**: You'll use the deployment user credentials later for GitHub Actions, but the setup script needs admin access to create resources.
 
-### Create Deployment User
+## 🛠️ Scripts Overview
+
+| Script | Purpose | Requirements |
+|--------|---------|--------------|
+| `setup-aws-user.sh` | Create deployment user | Admin access |
+| `aws-setup.sh` | Create AWS resources | Admin access |
+| `check-aws-resources.sh` | Check/manage resources | Any access |
+
+## 🚀 Setup Steps
+
+### 1. Create Deployment User
 
 ```bash
 chmod +x setup-aws-user.sh
 ./setup-aws-user.sh
 ```
 
-Save the displayed credentials for GitHub Secrets.
+Creates IAM user with minimal permissions and saves credentials to `.secrets/deployment-credentials.txt`.
 
-## 🚀 Deployment
+### 2. Create AWS Resources
 
 ```bash
-# Run setup script
 chmod +x aws-setup.sh
 ./aws-setup.sh
-
-# Configure GitHub Secrets (use deployment user credentials)
-# Copy from .secrets/github-secrets.txt to GitHub: Settings → Secrets → Actions
 ```
 
-## 🔧 What Gets Created
+Creates Free Tier infrastructure:
 
-- **S3 Bucket**: For deployment artifacts
-- **Elastic Beanstalk**: Application and environment (t2.micro, single instance)
-- **IAM User/Group**: For deployment with minimal required permissions
+- S3 bucket for deployments
+- Elastic Beanstalk app (t2.micro, single instance)
+- GitHub secrets configuration in `.secrets/github-secrets.txt`
+
+### 3. Configure GitHub Actions
+
+Add these secrets to your GitHub repository (Settings → Secrets → Actions):
+
+- `AWS_ACCESS_KEY_ID` (from deployment user)
+- `AWS_SECRET_ACCESS_KEY` (from deployment user)
+- `FLASK_SECRET_KEY` (generated automatically)
+
+## 🔍 Management
+
+```bash
+chmod +x check-aws-resources.sh
+
+# Check status
+./check-aws-resources.sh
+
+# List all environments
+./check-aws-resources.sh list
+
+# Clean up terminated environments
+./check-aws-resources.sh cleanup
+```
+
+## 💡 Free Tier Limits
+
+- **EC2**: 750 hours/month of t2.micro instances
+- **S3**: 5GB storage
+- **Elastic Beanstalk**: No additional charges
