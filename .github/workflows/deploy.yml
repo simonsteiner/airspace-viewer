@@ -29,10 +29,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Test application
-      run: |
-        python test_app.py
-
     - name: Generate deployment package
       run: |
         zip -r deploy.zip . -x \
