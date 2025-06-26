@@ -353,6 +353,77 @@ check_environment_access() {
     esac
 }
 
+# Function to create or verify IAM instance profile for Elastic Beanstalk
+create_eb_instance_profile() {
+    local profile_name="aws-elasticbeanstalk-ec2-role"
+    local role_name="aws-elasticbeanstalk-ec2-role"
+    
+    print_status "Checking for required IAM instance profile: $profile_name"
+    
+    # Check if instance profile exists
+    if aws iam get-instance-profile --instance-profile-name "$profile_name" &>/dev/null; then
+        print_success "IAM instance profile $profile_name already exists"
+        return 0
+    fi
+    
+    print_status "Creating IAM role and instance profile for Elastic Beanstalk..."
+    
+    # Create the assume role policy document
+    local assume_role_policy='{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Principal": {
+                    "Service": "ec2.amazonaws.com"
+                },
+                "Action": "sts:AssumeRole"
+            }
+        ]
+    }'
+    
+    # Create IAM role
+    if ! aws iam get-role --role-name "$role_name" &>/dev/null; then
+        print_status "Creating IAM role: $role_name"
+        aws iam create-role \
+            --role-name "$role_name" \
+            --assume-role-policy-document "$assume_role_policy" \
+            --description "IAM role for AWS Elastic Beanstalk EC2 instances"
+        
+        # Attach required policies
+        print_status "Attaching required policies to IAM role..."
+        aws iam attach-role-policy \
+            --role-name "$role_name" \
+            --policy-arn "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier"
+        
+        aws iam attach-role-policy \
+            --role-name "$role_name" \
+            --policy-arn "arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker"
+        
+        aws iam attach-role-policy \
+            --role-name "$role_name" \
+            --policy-arn "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
+        
+        print_success "IAM role created and policies attached"
+    else
+        print_success "IAM role $role_name already exists"
+    fi
+    
+    # Create instance profile
+    print_status "Creating IAM instance profile: $profile_name"
+    aws iam create-instance-profile --instance-profile-name "$profile_name"
+    
+    # Add role to instance profile
+    print_status "Adding role to instance profile..."
+    aws iam add-role-to-instance-profile \
+        --instance-profile-name "$profile_name" \
+        --role-name "$role_name"
+    
+    print_success "IAM instance profile created successfully"
+    print_status "Waiting for IAM changes to propagate..."
+    sleep 10
+}
+
 # Function to create Elastic Beanstalk environment
 create_eb_environment() {
     local app_name="$1"
@@ -523,12 +594,18 @@ main() {
     echo ""
     print_status "Starting AWS resource creation..."
     
+    # Create required IAM resources first
+    create_eb_instance_profile
+    
     # Create resources
     create_s3_bucket "$BUCKET_NAME" "$REGION"
     create_eb_application "$APP_NAME"
     
     # Cleanup old terminated environments before creating new one
     cleanup_old_environments "$APP_NAME"
+    
+    # Create or verify IAM instance profile
+    create_eb_instance_profile
     
     create_eb_environment "$APP_NAME" "$ENV_NAME" "$INSTANCE_TYPE" "$DEFAULT_PLATFORM"
     
@@ -552,6 +629,7 @@ main() {
     echo "✓ Single instance deployment (no load balancer charges)"
     echo "✓ S3 bucket with versioning (5GB free storage)"
     echo "✓ Elastic Beanstalk (no additional charges)"
+    echo "✓ IAM role and instance profile for EC2 instances"
     echo ""
     echo "Next steps:"
     echo "1. Wait for the Elastic Beanstalk environment to finish creating (5-10 minutes)"
