@@ -43,7 +43,7 @@ jobs:
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
         aws configure set region $AWS_REGION
 
-        # Basic environment access check
+        # Check environment access and wait for it to be ready
         echo "Checking access to Elastic Beanstalk environment..."
         ENV_STATUS=$(aws elasticbeanstalk describe-environments \
           --application-name $EB_APP_NAME \
@@ -58,12 +58,34 @@ jobs:
           exit 1
         fi
 
-        if [ "$ENV_STATUS" != "Ready" ]; then
-          echo "Error: Environment $EB_ENV_NAME is not ready (status: $ENV_STATUS)"
-          echo "Please run './check-aws-resources.sh' for detailed status"
-          echo "Environment must be in 'Ready' status before deploying"
-          exit 1
-        fi
+        # Wait for environment to be ready (with timeout)
+        WAIT_COUNT=0
+        MAX_WAIT=30  # Maximum wait time in minutes (30 * 60 seconds)
+        
+        while [ "$ENV_STATUS" != "Ready" ]; do
+          if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
+            echo "Error: Environment $EB_ENV_NAME did not become ready within 30 minutes"
+            echo "Current status: $ENV_STATUS"
+            echo "Please check the AWS Console or run './check-aws-resources.sh' for more details"
+            exit 1
+          fi
+          
+          echo "Environment status: $ENV_STATUS - Waiting for environment to be ready..."
+          echo "Waited $WAIT_COUNT minutes (max $MAX_WAIT minutes)"
+          sleep 60
+          WAIT_COUNT=$((WAIT_COUNT + 1))
+          
+          ENV_STATUS=$(aws elasticbeanstalk describe-environments \
+            --application-name $EB_APP_NAME \
+            --environment-names $EB_ENV_NAME \
+            --query 'Environments[0].Status' \
+            --output text 2>/dev/null || echo "ERROR")
+            
+          if [ "$ENV_STATUS" = "ERROR" ]; then
+            echo "Error: Unable to check environment status"
+            exit 1
+          fi
+        done
 
         echo "Environment is ready for deployment"
 
