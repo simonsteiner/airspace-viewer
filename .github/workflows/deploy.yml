@@ -43,6 +43,38 @@ jobs:
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
         aws configure set region $AWS_REGION
 
+        # Check if deploy user has access to the environment
+        echo "Checking access to Elastic Beanstalk environment..."
+        aws elasticbeanstalk describe-environments \
+          --application-name $EB_APP_NAME \
+          --environment-names $EB_ENV_NAME \
+          --query 'Environments[0].{Name:EnvironmentName,Status:Status,Health:Health}' \
+          --output table
+
+        # Verify environment exists and is accessible
+        ENV_STATUS=$(aws elasticbeanstalk describe-environments \
+          --application-name $EB_APP_NAME \
+          --environment-names $EB_ENV_NAME \
+          --query 'Environments[0].Status' \
+          --output text 2>/dev/null || echo "NOT_FOUND")
+
+        if [ "$ENV_STATUS" = "NOT_FOUND" ] || [ "$ENV_STATUS" = "None" ]; then
+          echo "Error: Cannot access environment $EB_ENV_NAME in application $EB_APP_NAME"
+          echo "Please check:"
+          echo "1. Environment name and application name are correct"
+          echo "2. Deploy user has elasticbeanstalk:DescribeEnvironments permission"
+          echo "3. Deploy user has access to the specific environment"
+          exit 1
+        fi
+
+        if [ "$ENV_STATUS" = "Terminated" ]; then
+          echo "Error: Environment $EB_ENV_NAME is in Terminated status"
+          echo "Please recreate the environment before deploying"
+          exit 1
+        fi
+
+        echo "Environment access confirmed. Status: $ENV_STATUS"
+
         # Set environment variables in Elastic Beanstalk
         aws elasticbeanstalk update-environment \
           --application-name $EB_APP_NAME \
