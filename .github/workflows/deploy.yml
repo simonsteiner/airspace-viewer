@@ -35,7 +35,7 @@ jobs:
 
     - name: Zip source bundle
       run: |
-        zip -r app.zip . -x "*.git*" "__pycache__/*" "*.sh" "*.pyc" "*.pyo" "*.egg-info*" ".github/*" "test_app.py" "*.md"
+        zip -r app.zip . -x "*.git*" "__pycache__/*" "*.sh" "*.pyc" "*.pyo" "*.egg-info*" ".github/*" "test_app.py" "*.md" ".venv/*"
 
     - name: Deploy to Elastic Beanstalk
       env:
