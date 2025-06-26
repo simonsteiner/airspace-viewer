@@ -1,4 +1,7 @@
 .venv/
+.secrets/
+github-secrets.txt
+deployment-credentials.txt
 
 *.pyc
 __pycache__/
