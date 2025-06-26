@@ -1,0 +1,60 @@
+name: Deploy to Elastic Beanstalk
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Zip source bundle
+      run: |
+        zip -r app.zip . -x "*.git*" "__pycache__/*" "*.pyc" "*.pyo" "*.egg-info*" ".github/*"
+
+    - name: Deploy to Elastic Beanstalk
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+        EB_APP_NAME: ${{ secrets.EB_APP_NAME }}
+        EB_ENV_NAME: ${{ secrets.EB_ENV_NAME }}
+        EB_S3_BUCKET: ${{ secrets.EB_S3_BUCKET }}
+        FLASK_SECRET_KEY: ${{ secrets.FLASK_SECRET_KEY }}
+      run: |
+        aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+        aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+        aws configure set region $AWS_REGION
+
+        # Set environment variables in Elastic Beanstalk
+        aws elasticbeanstalk update-environment \
+          --application-name $EB_APP_NAME \
+          --environment-name $EB_ENV_NAME \
+          --option-settings \
+            Namespace=aws:elasticbeanstalk:application:environment,OptionName=FLASK_SECRET_KEY,Value="$FLASK_SECRET_KEY"
+
+        VERSION_LABEL="deploy-$(date +%Y%m%d%H%M%S)"
+        aws s3 cp app.zip s3://$EB_S3_BUCKET/$VERSION_LABEL.zip
+        aws elasticbeanstalk create-application-version \
+          --application-name $EB_APP_NAME \
+          --version-label $VERSION_LABEL \
+          --source-bundle S3Bucket=$EB_S3_BUCKET,S3Key=$VERSION_LABEL.zip
+
+        aws elasticbeanstalk update-environment \
+          --application-name $EB_APP_NAME \
+          --environment-name $EB_ENV_NAME \
+          --version-label $VERSION_LABEL
