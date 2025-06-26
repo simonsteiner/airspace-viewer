@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import math
-from units import nautical_miles_to_meters
+from utils.units import nautical_miles_to_meters
 from model.openair_types import (
     Point,
     Arc,

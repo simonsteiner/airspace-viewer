@@ -28,7 +28,7 @@ class Altitude:
 
     def to_text(self) -> str:
         """Convert altitude to human-readable text."""
-        from units import feet_to_meters
+        from utils.units import feet_to_meters
 
         if self.type == AltitudeType.GND:
             return "GND"
