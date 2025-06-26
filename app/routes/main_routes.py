@@ -14,6 +14,12 @@ from utils.airspace_colors import (
 main_bp = Blueprint("main", __name__)
 
 
+@main_bp.route("/health")
+def health_check():
+    """Health check endpoint for load balancer and monitoring."""
+    return {"status": "healthy", "message": "Airspace Viewer is running"}, 200
+
+
 @main_bp.route("/")
 def index():
     """Render the main page with airspace map."""

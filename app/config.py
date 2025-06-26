@@ -7,8 +7,10 @@ import tempfile
 class Config:
     """Application configuration."""
 
-    # Flask settings
-    FLASK_SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "fallback-dev-key")
+    # Flask settings - use SECRET_KEY as Flask expects, but fall back to FLASK_SECRET_KEY
+    SECRET_KEY = os.environ.get("FLASK_SECRET_KEY") or os.environ.get(
+        "SECRET_KEY", "fallback-dev-key"
+    )
 
     # Upload settings
     UPLOAD_FOLDER = tempfile.gettempdir()
