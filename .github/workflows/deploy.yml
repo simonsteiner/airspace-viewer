@@ -33,9 +33,9 @@ jobs:
       run: |
         python test_app.py
 
-    - name: Zip source bundle
+    - name: Generate deployment package
       run: |
-        zip -r app.zip . -x \
+        zip -r deploy.zip . -x \
                 ".github/*" \
                 ".secrets/*" \
                 ".venv/*" \
@@ -47,8 +47,20 @@ jobs:
                 "*.pyo" \
                 "*.sh" \
                 "test_app.py"
-
     - name: Deploy to Elastic Beanstalk
+      uses: einaregilsson/beanstalk-deploy@v22
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: ${{ env.EB_APP_NAME }}
+        environment_name: ${{ env.EB_ENV_NAME }}
+        version_label: deploy-${{ github.run_number }}-${{ github.sha }}
+        region: ${{ env.AWS_REGION }}
+        deployment_package: deploy.zip
+        existing_bucket_name: ${{ env.EB_S3_BUCKET }}
+        version_description: "Deployment from commit ${{ github.sha }}"
+        wait_for_deployment: true
+    - name: Configure environment variables in Elastic Beanstalk
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -57,111 +69,11 @@ jobs:
         aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
         aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
         aws configure set region $AWS_REGION
-
-        # Check environment access and wait for it to be ready
-        echo "Checking access to Elastic Beanstalk environment..."
-        ENV_STATUS=$(aws elasticbeanstalk describe-environments \
-          --application-name $EB_APP_NAME \
-          --environment-names $EB_ENV_NAME \
-          --query 'Environments[0].Status' \
-          --output text 2>/dev/null || echo "NOT_FOUND")
-
-        if [ "$ENV_STATUS" = "NOT_FOUND" ] || [ "$ENV_STATUS" = "None" ]; then
-          echo "Error: Cannot access environment $EB_ENV_NAME"
-          echo "Please run './check-aws-resources.sh' to verify environment status"
-          echo "Or run './aws-setup.sh' to create the environment"
-          exit 1
-        fi
-
-        # Wait for environment to be ready (with timeout)
-        WAIT_COUNT=0
-        MAX_WAIT=30  # Maximum wait time in minutes (30 * 60 seconds)
         
-        while [ "$ENV_STATUS" != "Ready" ]; do
-          if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
-            echo "Error: Environment $EB_ENV_NAME did not become ready within 30 minutes"
-            echo "Current status: $ENV_STATUS"
-            echo "Please check the AWS Console or run './check-aws-resources.sh' for more details"
-            exit 1
-          fi
-          
-          echo "Environment status: $ENV_STATUS - Waiting for environment to be ready..."
-          echo "Waited $WAIT_COUNT minutes (max $MAX_WAIT minutes)"
-          sleep 60
-          WAIT_COUNT=$((WAIT_COUNT + 1))
-          
-          ENV_STATUS=$(aws elasticbeanstalk describe-environments \
-            --application-name $EB_APP_NAME \
-            --environment-names $EB_ENV_NAME \
-            --query 'Environments[0].Status' \
-            --output text 2>/dev/null || echo "ERROR")
-            
-          if [ "$ENV_STATUS" = "ERROR" ]; then
-            echo "Error: Unable to check environment status"
-            exit 1
-          fi
-        done
-
-        echo "Environment is ready for deployment"
-
-        # Set environment variables in Elastic Beanstalk (without overriding WSGI path)
+        # Set environment variables in Elastic Beanstalk
         aws elasticbeanstalk update-environment \
           --application-name $EB_APP_NAME \
           --environment-name $EB_ENV_NAME \
           --option-settings \
             Namespace=aws:elasticbeanstalk:application:environment,OptionName=FLASK_SECRET_KEY,Value="$FLASK_SECRET_KEY" \
             Namespace=aws:elasticbeanstalk:application:environment,OptionName=FLASK_ENV,Value=production
-
-        # Wait for environment variables update to complete
-        echo "Waiting for environment variables update to complete..."
-        WAIT_COUNT=0
-        while [ "$ENV_STATUS" != "Ready" ]; do
-          if [ $WAIT_COUNT -ge $MAX_WAIT ]; then
-            echo "Error: Environment $EB_ENV_NAME did not become ready within 30 minutes after environment variables update"
-            echo "Current status: $ENV_STATUS"
-            exit 1
-          fi
-          
-          echo "Environment status: $ENV_STATUS - Waiting for environment to be ready..."
-          sleep 60
-          WAIT_COUNT=$((WAIT_COUNT + 1))
-          
-          ENV_STATUS=$(aws elasticbeanstalk describe-environments \
-            --application-name $EB_APP_NAME \
-            --environment-names $EB_ENV_NAME \
-            --query 'Environments[0].Status' \
-            --output text 2>/dev/null || echo "ERROR")
-            
-          if [ "$ENV_STATUS" = "ERROR" ]; then
-            echo "Error: Unable to check environment status"
-            exit 1
-          fi
-        done
-
-        echo "Environment is ready for version deployment"
-
-        VERSION_LABEL="deploy-$(date +%Y%m%d%H%M%S)"
-        aws s3 cp app.zip s3://$EB_S3_BUCKET/$VERSION_LABEL.zip
-        aws elasticbeanstalk create-application-version \
-          --application-name $EB_APP_NAME \
-          --version-label $VERSION_LABEL \
-          --source-bundle S3Bucket=$EB_S3_BUCKET,S3Key=$VERSION_LABEL.zip
-
-        # Final check before deployment
-        ENV_STATUS=$(aws elasticbeanstalk describe-environments \
-          --application-name $EB_APP_NAME \
-          --environment-names $EB_ENV_NAME \
-          --query 'Environments[0].Status' \
-          --output text 2>/dev/null || echo "ERROR")
-
-        if [ "$ENV_STATUS" != "Ready" ]; then
-          echo "Error: Environment $EB_ENV_NAME is not ready for deployment"
-          echo "Current status: $ENV_STATUS"
-          exit 1
-        fi
-
-        echo "Deploying new version..."
-        aws elasticbeanstalk update-environment \
-          --application-name $EB_APP_NAME \
-          --environment-name $EB_ENV_NAME \
-          --version-label $VERSION_LABEL
