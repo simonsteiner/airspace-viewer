@@ -35,8 +35,7 @@ pip install -e .
 ### Running the Application
 
 ```bash
-cd app
-python app.py
+python application.py
 ```
 
 ## Architecture
@@ -68,3 +67,63 @@ python app.py
 
 - **Python**: `flask`, `openair`, `werkzeug`
 - **Frontend**: `leaflet`, `bootstrap`
+
+## Deployment
+
+### Fly.io
+
+This application can be deployed to [Fly.io](https://fly.io/) for production hosting.
+
+#### Setup Requirements
+
+Install the Fly.io CLI:
+
+```bash
+curl -L https://fly.io/install.sh | sh
+# Add Fly.io to your PATH (add to `.bashrc` or `.zshrc`):
+export FLYCTL_INSTALL="/home/$USER$/.fly"
+export PATH="$FLYCTL_INSTALL/bin:$PATH"
+```
+
+#### Deployment Setup
+
+The project includes a `fly.toml` configuration file for Fly.io deployment. To deploy:
+
+```bash
+# Login to Fly.io
+fly auth login
+# Launch the application
+fly launch
+# Deploy updates
+fly deploy
+```
+
+#### Local Docker Testing
+
+Before deploying to Fly.io, you can test the Docker image locally:
+
+```bash
+# Build the Docker image
+docker build -t my-fly-app .
+
+# Run the container locally on port 8080
+docker run -p 8080:8080 my-fly-app
+```
+
+The application will be available at <http://localhost:8080>.
+
+#### Application Details
+
+- **App Name**: `airspace-viewer-purple-dust-4259`
+- **Admin URL**: <https://fly.io/apps/airspace-viewer-purple-dust-4259>
+- **Live URL**: <https://airspace-viewer-purple-dust-4259.fly.dev>
+
+#### CI/CD Setup
+
+For automated deployments via GitHub Actions, create a deploy token:
+
+```bash
+fly tokens create deploy -x 999999h
+```
+
+Set the generated token as `FLY_API_TOKEN` secret in your GitHub repository settings.
