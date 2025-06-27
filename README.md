@@ -96,6 +96,10 @@ fly auth login
 fly launch --ha=false
 # If you already have two machines deployed, scale down to one
 fly scale count 1
+# Set Flask secret key for security
+python3 -c "import secrets; print('FLASK_SECRET_KEY=' + secrets.token_hex(32))"
+# Copy the output and set it as a secret (replace with actual generated key)
+fly secrets set FLASK_SECRET_KEY=your_generated_key_here
 # Deploy updates
 fly deploy
 ```
