@@ -92,8 +92,10 @@ The project includes a `fly.toml` configuration file for Fly.io deployment. To d
 ```bash
 # Login to Fly.io
 fly auth login
-# Launch the application
-fly launch
+# Launch the application (--ha=false ensures single machine deployment)
+fly launch --ha=false
+# If you already have two machines deployed, scale down to one
+fly scale count 1
 # Deploy updates
 fly deploy
 ```
@@ -114,9 +116,9 @@ The application will be available at <http://localhost:8080>.
 
 #### Application Details
 
-- **App Name**: `airspace-viewer-purple-dust-4259`
-- **Admin URL**: <https://fly.io/apps/airspace-viewer-purple-dust-4259>
-- **Live URL**: <https://airspace-viewer-purple-dust-4259.fly.dev>
+- **App Name**: `airspace-viewer`
+- **Admin URL**: <https://fly.io/apps/airspace-viewer>
+- **Live URL**: <https://airspace-viewer.fly.dev>
 
 #### CI/CD Setup
 
