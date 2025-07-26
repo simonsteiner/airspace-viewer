@@ -24,12 +24,15 @@ cd airspace-viewer
 
 # Create and activate a virtual environment
 python3 -m venv .venv
+# (Optional) If Python 3.13 is installed, create virtual environment with:
+python3.13 -m venv .venv
+
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install dependencies
+# Install dependencies (inside the virtual environment)
 pip install --upgrade pip
-# Install the package in development mode
-pip install -e .
+# Install the package in editable mode with all development dependencies
+pip install -e ".[dev]"
 ```
 
 ### Running the Application
@@ -133,3 +136,28 @@ fly tokens create deploy -x 999999h
 ```
 
 Set the generated token as `FLY_API_TOKEN` secret in your GitHub repository settings.
+
+---
+
+## Code Quality & Formatting
+
+To keep the codebase clean and consistent, use the following tools on the `app/` directory. You can run them manually, or automatically before each commit using pre-commit hooks:
+
+### Pre-commit Hook Setup
+
+1. Install pre-commit (once per machine): `pip install pre-commit`
+2. Install the hooks (once per clone): `pre-commit install`
+3. Now, every commit will automatically run:
+
+   ```bash
+   flake8 app/ --extend-ignore E501, E203
+   mypy app/
+   isort app/
+   black app/
+   pydocstyle --convention=google app/
+   npx cspell app/
+   ```
+
+You can also run all hooks manually: `pre-commit run --all-files` or specific hooks `pre-commit run cspell --all-files`
+
+If you need to skip hooks for a commit, use `git commit --no-verify`.

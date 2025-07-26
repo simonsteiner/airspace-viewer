@@ -1,0 +1,17 @@
+{
+    "version": "0.2",
+    "ignorePaths": ["app/examples/**"],
+    "dictionaryDefinitions": [
+        {
+            "name": "airspace-viewer",
+            "path": "./cspell-dictionary.txt"
+        }
+    ],
+    "dictionaries": [
+        "python",
+        "airspace-viewer"
+    ],
+    "words": [],
+    "ignoreWords": [],
+    "import": []
+}
