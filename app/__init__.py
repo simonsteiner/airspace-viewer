@@ -27,9 +27,11 @@ def create_app(config_name=None):
         # Register blueprints
         from .routes.api_routes import api_bp
         from .routes.main_routes import main_bp
+        from .routes.static_routes import static_bp
 
         app.register_blueprint(main_bp)
         app.register_blueprint(api_bp)
+        app.register_blueprint(static_bp)
         logger.info("Blueprints registered")
 
         # Initialize services on startup with error handling
