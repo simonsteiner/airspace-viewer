@@ -2,10 +2,11 @@
 
 import os
 
-from model.openair_types import convert_raw_airspace
 from openair import parse_file
-from utils.file_utils import get_default_airspace_path
-from utils.geojson_converter import convert_airspace_to_geojson
+
+from app.model.openair_types import convert_raw_airspace
+from app.utils.file_utils import get_default_airspace_path
+from app.utils.geojson_converter import convert_airspace_to_geojson
 
 
 class AirspaceService:
@@ -129,10 +130,12 @@ class AirspaceService:
 
     def get_airspace_stats(self):
         """Get airspace statistics."""
+        from typing import Any, Dict
+
         airspaces, _ = self.get_cached_data()
 
         # Count airspaces by class using typed objects
-        class_counts = {}
+        class_counts: Dict[Any, int] = {}
         for airspace in airspaces:
             airspace_class = airspace.airspace_class
             class_counts[airspace_class] = class_counts.get(airspace_class, 0) + 1
@@ -142,12 +145,18 @@ class AirspaceService:
     def _print_debug_info(self):
         """Print debug information about the first airspace."""
         print("First airspace structure:")
-        first_airspace = self._cached_airspaces[0]
-        print(f"Name: {first_airspace.name}")
-        print(f"Class: {first_airspace.airspace_class}")
-        print(f"Lower: {first_airspace.lower_bound.to_text()}")
-        print(f"Upper: {first_airspace.upper_bound.to_text()}")
-        print(f"Geometry type: {type(first_airspace.geom).__name__}")
+        if self._cached_airspaces and len(self._cached_airspaces) > 0:
+            first_airspace = self._cached_airspaces[0]
+            print(f"Name: {getattr(first_airspace, 'name', 'N/A')}")
+            print(f"Class: {getattr(first_airspace, 'airspace_class', 'N/A')}")
+            lower = getattr(first_airspace, "lower_bound", None)
+            upper = getattr(first_airspace, "upper_bound", None)
+            print(f"Lower: {lower.to_text() if lower else 'N/A'}")
+            print(f"Upper: {upper.to_text() if upper else 'N/A'}")
+            geom = getattr(first_airspace, "geom", None)
+            print(f"Geometry type: {type(geom).__name__ if geom else 'N/A'}")
+        else:
+            print("No airspace data available.")
 
 
 # Global service instance
