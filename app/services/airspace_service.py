@@ -14,6 +14,7 @@ from openair import parse_file
 from app.model.openair_types import convert_raw_airspace
 from app.utils.file_utils import get_default_airspace_path
 from app.utils.geojson_converter import convert_airspace_to_geojson
+from app.utils.logging_utils import debug_log, info_log
 
 
 class AirspaceService:
@@ -60,7 +61,7 @@ class AirspaceService:
         ) and os.path.exists(filepath):
 
             try:
-                print(f"Loading airspace data from: {filepath}")
+                info_log("airspace_service", f"Loading airspace data from: {filepath}")
 
                 # Use the openair library to parse the file (returns raw dictionary data)
                 raw_airspaces = parse_file(filepath)
@@ -73,14 +74,16 @@ class AirspaceService:
 
                 # Convert to GeoJSON for web display
                 self._cached_geojson = convert_airspace_to_geojson(
-                    self._cached_airspaces, verbose=self.verbose
+                    self._cached_airspaces
                 )
 
-                print(
-                    f"Loaded {len(self._cached_airspaces)} airspaces from {os.path.basename(filepath)}"
+                info_log(
+                    "airspace_service",
+                    f"Loaded {len(self._cached_airspaces)} airspaces from {os.path.basename(filepath)}",
                 )
-                print(
-                    f"Generated {len(self._cached_geojson['features'])} GeoJSON features"
+                info_log(
+                    "airspace_service",
+                    f"Generated {len(self._cached_geojson['features'])} GeoJSON features",
                 )
 
                 # Debug: Print first airspace structure
@@ -88,7 +91,7 @@ class AirspaceService:
                     self._print_debug_info()
 
             except Exception as e:
-                print(f"Error loading airspace data: {e}")
+                info_log("airspace_service", f"Error loading airspace data: {e}")
                 import traceback
 
                 traceback.print_exc()
@@ -97,7 +100,7 @@ class AirspaceService:
                 self._current_filename = None
 
         elif not os.path.exists(filepath):
-            print(f"File does not exist: {filepath}")
+            info_log("airspace_service", f"File does not exist: {filepath}")
             # If the cached file doesn't exist, reset to default
             if filepath != get_default_airspace_path():
                 return self.load_airspace_data()  # Recursive call with default file
@@ -117,7 +120,10 @@ class AirspaceService:
             tuple: (bool, str or None). True and None if successful, False and error message if failed.
         """
         try:
-            print(f"Loading airspace data from uploaded file: {filepath}")
+            info_log(
+                "airspace_service",
+                f"Loading airspace data from uploaded file: {filepath}",
+            )
             raw_airspaces = parse_file(filepath)
 
             # Convert raw data to typed Airspace objects
@@ -126,22 +132,24 @@ class AirspaceService:
             ]
 
             # Convert to GeoJSON for web display
-            self._cached_geojson = convert_airspace_to_geojson(
-                self._cached_airspaces, verbose=self.verbose
-            )
+            self._cached_geojson = convert_airspace_to_geojson(self._cached_airspaces)
 
             # Set current filename to the original filename for display
             self._current_filename = original_filename
 
-            print(
-                f"Loaded {len(self._cached_airspaces)} airspaces from {original_filename}"
+            info_log(
+                "airspace_service",
+                f"Loaded {len(self._cached_airspaces)} airspaces from {original_filename}",
             )
-            print(f"Generated {len(self._cached_geojson['features'])} GeoJSON features")
+            info_log(
+                "airspace_service",
+                f"Generated {len(self._cached_geojson['features'])} GeoJSON features",
+            )
 
             return True, None
 
         except Exception as e:
-            print(f"Error parsing uploaded file: {e}")
+            info_log("airspace_service", f"Error parsing uploaded file: {e}")
             import traceback
 
             traceback.print_exc()
@@ -200,19 +208,31 @@ class AirspaceService:
 
     def _print_debug_info(self) -> None:
         """Print debug information about the first airspace object in the cache."""
-        print("First airspace structure:")
+        debug_log("airspace_service", "First airspace structure:")
         if self._cached_airspaces and len(self._cached_airspaces) > 0:
             first_airspace = self._cached_airspaces[0]
-            print(f"Name: {getattr(first_airspace, 'name', 'N/A')}")
-            print(f"Class: {getattr(first_airspace, 'airspace_class', 'N/A')}")
+            debug_log(
+                "airspace_service", f"Name: {getattr(first_airspace, 'name', 'N/A')}"
+            )
+            debug_log(
+                "airspace_service",
+                f"Class: {getattr(first_airspace, 'airspace_class', 'N/A')}",
+            )
             lower = getattr(first_airspace, "lower_bound", None)
             upper = getattr(first_airspace, "upper_bound", None)
-            print(f"Lower: {lower.to_text() if lower else 'N/A'}")
-            print(f"Upper: {upper.to_text() if upper else 'N/A'}")
+            debug_log(
+                "airspace_service", f"Lower: {lower.to_text() if lower else 'N/A'}"
+            )
+            debug_log(
+                "airspace_service", f"Upper: {upper.to_text() if upper else 'N/A'}"
+            )
             geom = getattr(first_airspace, "geom", None)
-            print(f"Geometry type: {type(geom).__name__ if geom else 'N/A'}")
+            debug_log(
+                "airspace_service",
+                f"Geometry type: {type(geom).__name__ if geom else 'N/A'}",
+            )
         else:
-            print("No airspace data available.")
+            info_log("airspace_service", "No airspace data available.")
 
 
 # Global service instance

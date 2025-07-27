@@ -40,6 +40,7 @@ class Config:
 
     # Debug settings
     VERBOSE = False
+    DEBUG_LOGGING = False
 
     # Default airspace file - use absolute path from app directory
     DEFAULT_AIRSPACE_FILE = os.path.join(
@@ -53,8 +54,8 @@ class DevelopmentConfig(Config):
     Inherits from Config and enables debugging and verbose output.
     """
 
-    DEBUG = True
-    VERBOSE = False
+    VERBOSE = True
+    DEBUG_LOGGING = True  # Enable debug logging in development
 
 
 class ProductionConfig(Config):
@@ -63,8 +64,8 @@ class ProductionConfig(Config):
     Inherits from Config and disables debugging and verbose output.
     """
 
-    DEBUG = False
     VERBOSE = False
+    DEBUG_LOGGING = False  # Disable debug logging in production
 
 
 # Configuration mapping

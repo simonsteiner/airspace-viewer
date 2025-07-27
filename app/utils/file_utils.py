@@ -8,6 +8,8 @@ import os
 
 from werkzeug.utils import secure_filename
 
+from app.utils.logging_utils import error_log
+
 
 def allowed_file(filename: str, allowed_extensions: set[str] | list[str]) -> bool:
     """Check if the uploaded file has an allowed extension.
@@ -52,7 +54,7 @@ def cleanup_temp_file(filepath: str) -> None:
         if os.path.exists(filepath):
             os.remove(filepath)
     except Exception as e:
-        print(f"Warning: Could not remove temp file {filepath}: {e}")
+        error_log("file_utils", f"Error: Could not remove temp file {filepath}: {e}")
 
 
 def get_default_airspace_path() -> str:

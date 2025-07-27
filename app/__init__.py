@@ -25,13 +25,9 @@ def create_app(config_name=None):
     Raises:
         Exception: If the application fails to initialize.
     """
-    import logging
-
-    logger = logging.getLogger(__name__)
-
     try:
         app = Flask(__name__)
-        logger.info(f"Flask app created, config_name: {config_name}")
+        print(f"Configuring Flask app with config_name: {config_name}")
 
         # Load configuration
         if config_name is None:
@@ -40,7 +36,19 @@ def create_app(config_name=None):
         from .config import config
 
         app.config.from_object(config[config_name])
-        logger.info(f"Configuration loaded: {config_name}")
+        print(f"Configuration loaded: {config_name}")
+
+        # Set logger level to INFO
+        try:
+            import logging
+
+            from .utils import logging_utils
+
+            logging_utils.set_debug_enabled(False)
+            logger = logging.getLogger("airspace_viewer")
+            logger.setLevel(logging.INFO)
+        except Exception as e:
+            print(f"Failed to set logger level to INFO: {e}")
 
         # Register blueprints
         from .routes.api_routes import api_bp
@@ -50,9 +58,8 @@ def create_app(config_name=None):
         app.register_blueprint(main_bp)
         app.register_blueprint(api_bp)
         app.register_blueprint(static_bp)
-        logger.info("Blueprints registered")
+        print("Blueprints registered successfully")
 
-        # Initialize services on startup with error handling
         with app.app_context():
             try:
                 from .services.airspace_service import get_airspace_service
@@ -60,14 +67,14 @@ def create_app(config_name=None):
                 service = get_airspace_service()
                 # Load default data on startup
                 service.load_airspace_data()
-                logger.info("Airspace service initialized successfully")
+                print("Airspace service initialized successfully")
             except Exception as e:
-                logger.error(f"Failed to initialize airspace service: {e}")
+                print(f"Failed to initialize airspace service: {e}")
                 # Continue without failing - service can be initialized later
 
-        logger.info("Application created successfully")
+        print("Flask application created successfully")
         return app
 
     except Exception as e:
-        logger.error(f"Failed to create Flask application: {e}")
+        print(f"Failed to create Flask application: {e}")
         raise
