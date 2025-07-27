@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""API routes for the Airspace Viewer application."""
 
 from flask import Blueprint, jsonify
 

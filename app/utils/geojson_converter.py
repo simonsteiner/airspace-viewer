@@ -1,6 +1,11 @@
-#!/usr/bin/env python3
+"""GeoJSON converter utilities.
+
+This module provides utilities to convert airspace data structures into GeoJSON format for mapping and visualization.
+It supports conversion of various airspace geometries (polygons, circles, lines) and includes helpers for altitude formatting.
+"""
 
 import math
+from typing import Any, Dict, List, Optional
 
 from app.model.openair_types import (
     Arc,
@@ -13,8 +18,15 @@ from app.utils.airspace_colors import get_airspace_color
 from app.utils.units import nautical_miles_to_meters
 
 
-def altitude_to_text(altitude):
-    """Convert altitude object to human-readable text."""
+def altitude_to_text(altitude: Any) -> str:
+    """Convert an altitude object or dictionary to a human-readable string.
+
+    Args:
+        altitude (Altitude | dict | any): The altitude object, dictionary, or value to convert.
+
+    Returns:
+        str: Human-readable altitude string.
+    """
     from app.model.openair_types import Altitude, AltitudeType
 
     if isinstance(altitude, Altitude):
@@ -32,8 +44,18 @@ def altitude_to_text(altitude):
         return str(altitude)
 
 
-def convert_airspace_to_geojson(airspaces, verbose=False):
-    """Convert airspace data to GeoJSON format for mapping."""
+def convert_airspace_to_geojson(
+    airspaces: List[Any], verbose: bool = False
+) -> Dict[str, Any]:
+    """Convert a list of airspace objects or dictionaries to a GeoJSON FeatureCollection.
+
+    Args:
+        airspaces (list): List of airspace objects or dictionaries.
+        verbose (bool, optional): If True, print debug information. Defaults to False.
+
+    Returns:
+        dict: GeoJSON FeatureCollection representing the airspaces.
+    """
     features = []
     skipped_reasons: dict = {}
 
@@ -82,8 +104,16 @@ def convert_airspace_to_geojson(airspaces, verbose=False):
     return {"type": "FeatureCollection", "features": features}
 
 
-def _create_geojson_feature(airspace, verbose=False):
-    """Create a GeoJSON feature from an airspace object."""
+def _create_geojson_feature(airspace: Any, verbose: bool = False) -> Dict[str, Any]:
+    """Create a GeoJSON feature from an airspace object.
+
+    Args:
+        airspace: The airspace object to convert.
+        verbose (bool, optional): If True, print debug information. Defaults to False.
+
+    Returns:
+        dict: GeoJSON feature dictionary.
+    """
     name = airspace.name
     airspace_class = airspace.airspace_class
     lower_bound = altitude_to_text(airspace.lower_bound)
@@ -123,20 +153,37 @@ def _create_geojson_feature(airspace, verbose=False):
     return feature
 
 
-def _process_polygon_geometry(geom, feature, verbose=False):
-    """Process polygon geometry and return GeoJSON geometry."""
+def _process_polygon_geometry(
+    geom: PolygonGeometry, feature: Dict[str, Any], verbose: bool = False
+) -> Optional[Dict[str, Any]]:
+    """Process a PolygonGeometry object and return a GeoJSON geometry.
+
+    Args:
+        geom (PolygonGeometry): The polygon geometry to process.
+        feature (dict): The GeoJSON feature being constructed (for property updates).
+        verbose (bool, optional): If True, print debug information. Defaults to False.
+
+    Returns:
+        dict | None: GeoJSON geometry dictionary, or None if invalid.
+    """
     if verbose:
-        print(f"  Processing polygon with {len(geom.segments)} segments")
+        segment_count = len(geom.segments) if geom.segments is not None else 0
+        print(f"  Processing polygon with {segment_count} segments")
 
     coordinates = []
-    for segment in geom.segments:
-        if isinstance(segment, Point):
-            coordinates.append([segment.lng, segment.lat])  # GeoJSON uses [lon, lat]
-        elif isinstance(segment, (Arc, ArcSegment)):
-            # Log that we're skipping Arc/ArcSegment for now
-            print(f"    Skipping {type(segment).__name__} segment (not implemented)")
-        else:
-            print(f"    Unknown segment type: {type(segment).__name__}")
+    if geom.segments is not None:
+        for segment in geom.segments:
+            if isinstance(segment, Point):
+                coordinates.append(
+                    [segment.lng, segment.lat]
+                )  # GeoJSON uses [lon, lat]
+            elif isinstance(segment, (Arc, ArcSegment)):
+                # Log that we're skipping Arc/ArcSegment for now
+                print(
+                    f"    Skipping {type(segment).__name__} segment (not implemented)"
+                )
+            else:
+                print(f"    Unknown segment type: {type(segment).__name__}")
 
     if verbose:
         print(f"  Extracted {len(coordinates)} coordinate points")
@@ -164,8 +211,18 @@ def _process_polygon_geometry(geom, feature, verbose=False):
         return None
 
 
-def _process_circle_geometry(geom, verbose=False):
-    """Process circle geometry and return GeoJSON geometry."""
+def _process_circle_geometry(
+    geom: CircleGeometry, verbose: bool = False
+) -> Optional[Dict[str, Any]]:
+    """Process a CircleGeometry object and return a GeoJSON geometry.
+
+    Args:
+        geom (CircleGeometry): The circle geometry to process.
+        verbose (bool, optional): If True, print debug information. Defaults to False.
+
+    Returns:
+        dict | None: GeoJSON geometry dictionary, or None if invalid.
+    """
     if verbose:
         print(
             f"  Processing circle with center {geom.centerpoint} and radius {geom.radius}"
@@ -173,12 +230,11 @@ def _process_circle_geometry(geom, verbose=False):
 
     if (
         geom.centerpoint
-        and "lat" in geom.centerpoint
-        and "lng" in geom.centerpoint
+        and hasattr(geom.centerpoint, "lat")
+        and hasattr(geom.centerpoint, "lng")
         and geom.radius > 0
     ):
-
-        center_lat, center_lng = geom.centerpoint["lat"], geom.centerpoint["lng"]
+        center_lat, center_lng = geom.centerpoint.lat, geom.centerpoint.lng
 
         # Convert nautical miles to degrees (more precise calculation)
         radius_meters = nautical_miles_to_meters(geom.radius)
@@ -206,8 +262,13 @@ def _process_circle_geometry(geom, verbose=False):
         return None
 
 
-def _handle_conversion_error(airspace_data, error):
-    """Handle errors during airspace conversion."""
+def _handle_conversion_error(airspace_data: Any, error: Exception) -> None:
+    """Handle and print errors that occur during airspace conversion.
+
+    Args:
+        airspace_data (object): The airspace data that caused the error.
+        error (Exception): The exception that was raised.
+    """
     if isinstance(airspace_data, dict):
         name = airspace_data.get("name", "Unknown")
         print(f"Error processing airspace {name}: {error}")
@@ -223,8 +284,18 @@ def _handle_conversion_error(airspace_data, error):
     print(f"  Traceback: {traceback.format_exc()}")
 
 
-def _print_conversion_summary(skipped_reasons, features, verbose=False):
-    """Print summary of conversion results."""
+def _print_conversion_summary(
+    skipped_reasons: Dict[str, int],
+    features: List[Dict[str, Any]],
+    verbose: bool = False,
+) -> None:
+    """Print a summary of the airspace conversion results, including skipped airspaces and line obstacles.
+
+    Args:
+        skipped_reasons (dict): Reasons and counts for skipped airspaces.
+        features (list): List of successfully converted GeoJSON features.
+        verbose (bool, optional): If True, print debug information. Defaults to False.
+    """
     if skipped_reasons:
         print("\nSkipped airspaces summary:")
         for reason, count in skipped_reasons.items():

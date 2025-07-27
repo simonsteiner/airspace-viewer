@@ -1,6 +1,13 @@
-#!/usr/bin/env python3
+"""Airspace Service Module.
+
+Provides the `AirspaceService` class for managing, loading, and converting airspace data.
+
+This module handles parsing OpenAir files, converting them to typed airspace objects, and generating GeoJSON for web display.
+It also provides a global service instance and helper functions for use in a Flask application.
+"""
 
 import os
+from typing import Any, Dict, List, Optional, Tuple
 
 from openair import parse_file
 
@@ -10,16 +17,39 @@ from app.utils.geojson_converter import convert_airspace_to_geojson
 
 
 class AirspaceService:
-    """Service for managing airspace data."""
+    """Service for managing airspace data.
 
-    def __init__(self, verbose=False):
+    This class loads, parses, and caches airspace data from OpenAir files, converts them to typed objects,
+    and generates GeoJSON for web display. It also provides statistics and debug information.
+    """
+
+    verbose: bool
+    _cached_airspaces: Optional[List[Any]]
+    _cached_geojson: Optional[Dict[str, Any]]
+    _current_filename: Optional[str]
+
+    def __init__(self, verbose: bool = False) -> None:
+        """Initialize the AirspaceService.
+
+        Args:
+            verbose (bool): If True, enables verbose debug output.
+        """
         self.verbose = verbose
         self._cached_airspaces = None
         self._cached_geojson = None
         self._current_filename = None
 
-    def load_airspace_data(self, filepath=None):
-        """Load and process airspace data from a file."""
+    def load_airspace_data(
+        self, filepath: Optional[str] = None
+    ) -> Tuple[Optional[List[Any]], Optional[Dict[str, Any]]]:
+        """Load and process airspace data from a file.
+
+        Args:
+            filepath (str, optional): Path to the OpenAir file. If None, uses the default Switzerland file.
+
+        Returns:
+            tuple: (list of Airspace objects, GeoJSON dict)
+        """
         # Use provided filepath or default Switzerland file
         if filepath is None:
             filepath = get_default_airspace_path()
@@ -74,8 +104,18 @@ class AirspaceService:
 
         return self._cached_airspaces, self._cached_geojson
 
-    def load_from_uploaded_file(self, filepath, original_filename):
-        """Load airspace data from an uploaded file."""
+    def load_from_uploaded_file(
+        self, filepath: str, original_filename: str
+    ) -> Tuple[bool, Optional[str]]:
+        """Load airspace data from an uploaded file.
+
+        Args:
+            filepath (str): Path to the uploaded file.
+            original_filename (str): Original filename for display purposes.
+
+        Returns:
+            tuple: (bool, str or None). True and None if successful, False and error message if failed.
+        """
         try:
             print(f"Loading airspace data from uploaded file: {filepath}")
             raw_airspaces = parse_file(filepath)
@@ -107,32 +147,48 @@ class AirspaceService:
             traceback.print_exc()
             return False, str(e)
 
-    def reset_to_default(self):
-        """Reset to default airspace data."""
+    def reset_to_default(self) -> None:
+        """Reset the service to use the default airspace data."""
         self._cached_airspaces = None
         self._cached_geojson = None
         self._current_filename = None
 
-    def get_cached_data(self):
-        """Get currently cached airspace and GeoJSON data."""
+    def get_cached_data(self) -> Tuple[Optional[List[Any]], Optional[Dict[str, Any]]]:
+        """Get currently cached airspace and GeoJSON data.
+
+        Returns:
+            tuple: (list of Airspace objects, GeoJSON dict)
+        """
         if self._cached_airspaces is not None and self._cached_geojson is not None:
             return self._cached_airspaces, self._cached_geojson
         else:
             return self.load_airspace_data()
 
-    def get_current_filename(self):
-        """Get the current filename being displayed."""
+    def get_current_filename(self) -> str:
+        """Get the current filename being displayed.
+
+        Returns:
+            str: The base name of the current file, or the default example filename.
+        """
         return (
             os.path.basename(self._current_filename)
             if self._current_filename
             else "examples/Switzerland.txt"
         )
 
-    def get_airspace_stats(self):
-        """Get airspace statistics."""
+    def get_airspace_stats(self) -> Dict[str, Any]:
+        """Get statistics about the loaded airspaces.
+
+        Returns:
+            dict: Dictionary with total airspaces and counts by class.
+        """
         from typing import Any, Dict
 
         airspaces, _ = self.get_cached_data()
+
+        # Handle None case
+        if airspaces is None:
+            return {"total_airspaces": 0, "classes": {}}
 
         # Count airspaces by class using typed objects
         class_counts: Dict[Any, int] = {}
@@ -142,8 +198,8 @@ class AirspaceService:
 
         return {"total_airspaces": len(airspaces), "classes": class_counts}
 
-    def _print_debug_info(self):
-        """Print debug information about the first airspace."""
+    def _print_debug_info(self) -> None:
+        """Print debug information about the first airspace object in the cache."""
         print("First airspace structure:")
         if self._cached_airspaces and len(self._cached_airspaces) > 0:
             first_airspace = self._cached_airspaces[0]
@@ -163,8 +219,12 @@ class AirspaceService:
 airspace_service = None
 
 
-def get_airspace_service():
-    """Get the global airspace service instance."""
+def get_airspace_service() -> AirspaceService:
+    """Get the global airspace service instance for use in a Flask app.
+
+    Returns:
+        AirspaceService: The global AirspaceService instance.
+    """
     global airspace_service
     if airspace_service is None:
         from flask import current_app

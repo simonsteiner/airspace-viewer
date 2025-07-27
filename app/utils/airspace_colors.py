@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-"""
-Centralized airspace color configuration.
+"""Centralized airspace color configuration.
 
 This module defines the color scheme for different airspace classes,
 providing a single source of truth for all components (Python, JavaScript, CSS).
@@ -26,12 +24,23 @@ DEFAULT_COLOR = "#999999"  # Grey
 
 
 def get_airspace_color(airspace_class: str) -> str:
-    """Get color for airspace class."""
+    """Get the color code for a given airspace class.
+
+    Args:
+        airspace_class (str): The airspace class identifier (e.g., 'A', 'B', 'CTR').
+
+    Returns:
+        str: The corresponding hex color code. Returns the default color if the class is unknown.
+    """
     return AIRSPACE_COLORS.get(airspace_class, DEFAULT_COLOR)
 
 
 def generate_css_classes() -> str:
-    """Generate CSS class definitions for airspace colors."""
+    """Generate CSS class definitions for airspace colors.
+
+    Returns:
+        str: CSS class definitions as a string, with each airspace class mapped to a background color.
+    """
     css_lines = []
     for airspace_class, color in AIRSPACE_COLORS.items():
         css_class_name = f"class-{airspace_class}"
@@ -51,7 +60,11 @@ def generate_css_classes() -> str:
 
 
 def generate_javascript_colors() -> str:
-    """Generate JavaScript object for airspace colors."""
+    """Generate a JavaScript object definition for airspace colors.
+
+    Returns:
+        str: JavaScript code as a string, defining the airspace color mapping and default color.
+    """
     js_lines = ["const AIRSPACE_COLORS = {"]
     for airspace_class, color in AIRSPACE_COLORS.items():
         js_lines.append(f"    '{airspace_class}': '{color}',")
@@ -62,7 +75,11 @@ def generate_javascript_colors() -> str:
 
 
 def generate_css_variables() -> str:
-    """Generate CSS custom properties (variables) for airspace colors."""
+    """Generate CSS custom properties (variables) for airspace colors.
+
+    Returns:
+        str: CSS variable definitions as a string, with each airspace class mapped to a CSS custom property.
+    """
     css_lines = [":root {"]
     for airspace_class, color in AIRSPACE_COLORS.items():
         css_var_name = f"--airspace-{airspace_class.lower()}"
@@ -73,7 +90,11 @@ def generate_css_variables() -> str:
 
 
 def generate_complete_css() -> str:
-    """Generate complete CSS including variables and classes."""
+    """Generate complete CSS including variables and classes.
+
+    Returns:
+        str: Complete CSS as a string, including CSS variables and class definitions for airspace colors.
+    """
     css_parts = [
         "/* Airspace class colors - generated from centralized config */",
         generate_css_variables(),
@@ -84,20 +105,36 @@ def generate_complete_css() -> str:
 
 
 def get_legend_data() -> list:
-    """Get legend data for template rendering."""
+    """Get legend data for template rendering.
+
+    Returns:
+        list: A list of dictionaries, each containing 'class', 'color', and 'name' for an airspace class.
+    """
     return [
         {"class": airspace_class, "color": color, "name": f"Class {airspace_class}"}
         for airspace_class, color in AIRSPACE_COLORS.items()
     ]
 
 
-# if __name__ == "__main__":
-#     # Print generated CSS for verification
-#     print("Generated CSS:")
-#     print(generate_css_classes())
-#     print("\nGenerated JavaScript:")
-#     print(generate_javascript_colors())
-#     print("\nGenerated CSS Variables:")
-#     print(generate_css_variables())
-#     print("\nGenerated Complete CSS:")
-#     print(generate_complete_css())
+# Debug utility: call this from within an app context if needed
+def print_airspace_colors_debug():
+    """Print debug info about airspace colors. Call from within a Flask app context."""
+    try:
+        from flask import current_app
+
+        debug = current_app.config.get("DEBUG", False)
+    except Exception:
+        print("[airspace_colors] Not in Flask app context; skipping debug output.")
+        return
+    print(f"Debug mode is {'enabled' if debug else 'disabled'}")
+    print("Generating airspace colors...")
+    if debug:
+        # Print generated CSS for verification
+        print("Generated CSS:")
+        print(generate_css_classes())
+        print("\nGenerated JavaScript:")
+        print(generate_javascript_colors())
+        print("\nGenerated CSS Variables:")
+        print(generate_css_variables())
+        print("\nGenerated Complete CSS:")
+        print(generate_complete_css())

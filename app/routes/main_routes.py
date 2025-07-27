@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+"""Main web routes for the Airspace Viewer Flask application."""
 
 import json
 
@@ -31,7 +31,7 @@ def index():
     return render_template(
         "index.html",
         title="Airspace Viewer",
-        airspace_count=len(airspaces),
+        airspace_count=len(airspaces or []),
         geojson=json.dumps(geojson),
         current_file=current_file,
         legend_data=get_legend_data(),
@@ -66,7 +66,8 @@ def upload_file():
         success, error_msg = service.load_from_uploaded_file(filepath, file.filename)
 
         if success:
-            airspace_count = len(service.get_cached_data()[0])
+            airspaces = service.get_cached_data()[0] or []
+            airspace_count = len(airspaces)
             flash(
                 f"Successfully loaded {airspace_count} airspaces from {file.filename}",
                 "success",

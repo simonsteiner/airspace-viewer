@@ -1,4 +1,11 @@
-#!/usr/bin/env python3
+"""Flask application factory and initialization logic.
+
+It sets up configuration, registers blueprints, and initializes core services on startup.
+
+Public Functions:
+    create_app: Application factory for creating and configuring the Flask app instance.
+    main: Main entry point for running the application in development mode.
+"""
 
 import os
 
@@ -6,7 +13,18 @@ from flask import Flask
 
 
 def create_app(config_name=None):
-    """Application factory function."""
+    """Application factory function for the Flask app.
+
+    Args:
+        config_name (str, optional): The configuration name to use (e.g., 'development', 'production').
+            If None, uses the FLASK_ENV environment variable or 'default'.
+
+    Returns:
+        Flask: The configured Flask application instance.
+
+    Raises:
+        Exception: If the application fails to initialize.
+    """
     import logging
 
     logger = logging.getLogger(__name__)
@@ -53,13 +71,3 @@ def create_app(config_name=None):
     except Exception as e:
         logger.error(f"Failed to create Flask application: {e}")
         raise
-
-
-def main():
-    """Main entry point for running the application."""
-    app = create_app("development")
-    app.run(debug=True, port=os.getenv("PORT", default=5002), host="0.0.0.0")
-
-
-if __name__ == "__main__":
-    main()

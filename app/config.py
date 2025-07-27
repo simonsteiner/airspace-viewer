@@ -1,11 +1,32 @@
-#!/usr/bin/env python3
+"""Configuration settings for the airspace-viewer application.
+
+This module defines configuration classes for different environments (development, production),
+including settings for Flask, file uploads, and airspace file defaults.
+
+Classes:
+    Config: Base configuration class with default settings.
+    DevelopmentConfig: Configuration for development environment.
+    ProductionConfig: Configuration for production environment.
+
+Attributes:
+    config (dict): Mapping of environment names to configuration classes.
+"""
 
 import os
 import tempfile
 
 
 class Config:
-    """Application configuration."""
+    """Base application configuration.
+
+    Attributes:
+        SECRET_KEY (str): Secret key for Flask sessions.
+        UPLOAD_FOLDER (str): Directory for file uploads.
+        MAX_CONTENT_LENGTH (int): Maximum allowed upload size in bytes.
+        ALLOWED_EXTENSIONS (set): Allowed file extensions for uploads.
+        VERBOSE (bool): Verbosity flag for logging/debugging.
+        DEFAULT_AIRSPACE_FILE (str): Path to the default airspace file.
+    """
 
     # Flask settings - use SECRET_KEY as Flask expects, but fall back to FLASK_SECRET_KEY
     SECRET_KEY = os.environ.get("FLASK_SECRET_KEY") or os.environ.get(
@@ -27,14 +48,20 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    """Development configuration."""
+    """Development environment configuration.
+
+    Inherits from Config and enables debugging and verbose output.
+    """
 
     DEBUG = True
-    VERBOSE = True
+    VERBOSE = False
 
 
 class ProductionConfig(Config):
-    """Production configuration."""
+    """Production environment configuration.
+
+    Inherits from Config and disables debugging and verbose output.
+    """
 
     DEBUG = False
     VERBOSE = False
