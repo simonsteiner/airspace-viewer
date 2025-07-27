@@ -231,14 +231,22 @@ def _process_circle_geometry(geom: CircleGeometry) -> Optional[Dict[str, Any]]:
         f"  Processing circle with center {geom.centerpoint} and radius {geom.radius}",
     )
 
+    center_lat = center_lng = None
+    if geom.centerpoint:
+        if isinstance(geom.centerpoint, dict):
+            center_lat = geom.centerpoint.get("lat")
+            center_lng = geom.centerpoint.get("lng")
+        elif hasattr(geom.centerpoint, "lat") and hasattr(geom.centerpoint, "lng"):
+            center_lat = geom.centerpoint.lat
+            center_lng = geom.centerpoint.lng
+
     if (
-        geom.centerpoint
-        and hasattr(geom.centerpoint, "lat")
-        and hasattr(geom.centerpoint, "lng")
+        center_lat is not None
+        and center_lng is not None
+        and isinstance(center_lat, (int, float))
+        and isinstance(center_lng, (int, float))
         and geom.radius > 0
     ):
-        center_lat, center_lng = geom.centerpoint.lat, geom.centerpoint.lng
-
         # Convert nautical miles to degrees (more precise calculation)
         radius_meters = nautical_miles_to_meters(geom.radius)
         radius_deg = radius_meters / 111320  # meters per degree at equator
@@ -255,7 +263,10 @@ def _process_circle_geometry(geom: CircleGeometry) -> Optional[Dict[str, Any]]:
 
         # Close the circle
         coordinates.append(coordinates[0])
-
+        debug_log(
+            "geojson_converter",
+            f"  ✓ Converted circle to polygon with {len(coordinates)} points",
+        )
         return {"type": "Polygon", "coordinates": [coordinates]}
     else:
         error_log(
