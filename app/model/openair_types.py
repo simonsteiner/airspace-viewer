@@ -5,7 +5,7 @@ This module defines the data structures used for airspace representation.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 
 class AltitudeType(Enum):
@@ -28,15 +28,35 @@ class Altitude:
 
     def to_text(self) -> str:
         """Convert altitude to human-readable text."""
-        from utils.units import feet_to_meters
+        from app.utils.units import feet_to_meters
 
         if self.type == AltitudeType.GND:
             return "GND"
         elif self.type == AltitudeType.FEET_AMSL:
-            meters = int(feet_to_meters(self.val)) if self.val else 0
+            val = self.val
+            if val is None or val == "":
+                meters = 0
+            else:
+                try:
+                    if isinstance(val, (int, float)):
+                        meters = int(feet_to_meters(val))
+                    else:
+                        meters = int(feet_to_meters(float(val)))
+                except (TypeError, ValueError):
+                    meters = 0
             return f"{meters} m AMSL"
         elif self.type == AltitudeType.FEET_AGL:
-            meters = int(feet_to_meters(self.val)) if self.val else 0
+            val = self.val
+            if val is None or val == "":
+                meters = 0
+            else:
+                try:
+                    if isinstance(val, (int, float)):
+                        meters = int(feet_to_meters(val))
+                    else:
+                        meters = int(feet_to_meters(float(val)))
+                except (TypeError, ValueError):
+                    meters = 0
             return f"{meters} m AGL"
         elif self.type == AltitudeType.FLIGHT_LEVEL:
             return f"FL {self.val}"
@@ -62,9 +82,9 @@ class Arc:
     """Represents an arc segment."""
 
     type: str = "Arc"
-    center: Point = None
-    start: Point = None
-    end: Point = None
+    center: Optional[Point] = None
+    start: Optional[Point] = None
+    end: Optional[Point] = None
     direction: str = "CW"  # CW or CCW
 
 
@@ -73,7 +93,7 @@ class ArcSegment:
     """Represents an arc segment with radius."""
 
     type: str = "ArcSegment"
-    center: Point = None
+    center: Optional[Point] = None
     radius: float = 0.0
     start_angle: float = 0.0
     end_angle: float = 0.0
@@ -89,7 +109,7 @@ class PolygonGeometry:
     """Represents polygon geometry."""
 
     type: str = "Polygon"
-    segments: List[PolygonSegment] = None
+    segments: Optional[List[PolygonSegment]] = None
 
     def __post_init__(self):
         if self.segments is None:
@@ -101,7 +121,7 @@ class CircleGeometry:
     """Represents circle geometry."""
 
     type: str = "Circle"
-    centerpoint: List[float] = None  # [lat, lng]
+    centerpoint: Optional[List[float]] = None  # [lat, lng]
     radius: float = 0.0  # in nautical miles
 
     def __post_init__(self):
@@ -119,9 +139,9 @@ class Airspace:
 
     name: str = ""
     class_: str = ""  # Using class_ to avoid Python keyword conflict
-    lower_bound: Altitude = None
-    upper_bound: Altitude = None
-    geom: AirspaceGeometry = None
+    lower_bound: Optional[Altitude] = None
+    upper_bound: Optional[Altitude] = None
+    geom: Optional[AirspaceGeometry] = None
 
     def __post_init__(self):
         if self.lower_bound is None:
@@ -181,7 +201,8 @@ def convert_raw_airspace(raw_data: Dict[str, Any]) -> Airspace:
                         )
                     # Add Arc and ArcSegment parsing as needed
 
-            return PolygonGeometry(type=geom_type, segments=segments)
+            # segments is List[Point], but PolygonGeometry expects Optional[List[PolygonSegment]]
+            return PolygonGeometry(type=geom_type, segments=segments if segments else None)  # type: ignore[arg-type]
 
     return Airspace(
         name=raw_data.get("name", ""),
