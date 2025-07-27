@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
 import math
-from utils.units import nautical_miles_to_meters
+
 from model.openair_types import (
-    Point,
     Arc,
     ArcSegment,
-    PolygonGeometry,
     CircleGeometry,
+    Point,
+    PolygonGeometry,
 )
 from utils.airspace_colors import get_airspace_color
+from utils.units import nautical_miles_to_meters
 
 
 def altitude_to_text(altitude):
@@ -149,7 +150,7 @@ def _process_polygon_geometry(geom, feature, verbose=False):
     elif len(coordinates) == 2:
         # Handle line obstacles (e.g., cables, power lines) as LineString
         if verbose:
-            print(f"  ⚠ Converting 2-point polygon to LineString")
+            print("  ⚠ Converting 2-point polygon to LineString")
 
         # Update feature properties for line obstacle
         feature["properties"]["geometryType"] = "line"
@@ -225,7 +226,7 @@ def _handle_conversion_error(airspace_data, error):
 def _print_conversion_summary(skipped_reasons, features, verbose=False):
     """Print summary of conversion results."""
     if skipped_reasons:
-        print(f"\nSkipped airspaces summary:")
+        print("\nSkipped airspaces summary:")
         for reason, count in skipped_reasons.items():
             print(f"  {reason}: {count} airspaces")
         total_skipped = sum(skipped_reasons.values())

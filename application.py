@@ -2,9 +2,9 @@
 WSGI entry point for AWS Elastic Beanstalk
 """
 
+import logging
 import os
 import sys
-import logging
 
 from app import create_app
 

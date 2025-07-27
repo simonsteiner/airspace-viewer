@@ -1,0 +1,14 @@
+airspaceinfo
+amsl
+Bargen
+cpus
+Danilo
+envrc
+FLYCTL
+htmlcov
+jsonify
+mapdiv
+openair
+PYTHONDONTWRITEBYTECODE
+PYTHONUNBUFFERED
+superfly

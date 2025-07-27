@@ -4,8 +4,8 @@ This module defines the data structures used for airspace representation.
 """
 
 from dataclasses import dataclass
-from typing import Union, List, Dict, Any
 from enum import Enum
+from typing import Any, Dict, List, Union
 
 
 class AltitudeType(Enum):

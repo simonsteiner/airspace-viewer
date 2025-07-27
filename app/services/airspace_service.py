@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-from openair import parse_file
+
 from model.openair_types import convert_raw_airspace
-from utils.geojson_converter import convert_airspace_to_geojson
+from openair import parse_file
 from utils.file_utils import get_default_airspace_path
+from utils.geojson_converter import convert_airspace_to_geojson
 
 
 class AirspaceService:

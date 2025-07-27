@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+
 from flask import Flask
 
 
@@ -24,8 +25,8 @@ def create_app(config_name=None):
         logger.info(f"Configuration loaded: {config_name}")
 
         # Register blueprints
-        from .routes.main_routes import main_bp
         from .routes.api_routes import api_bp
+        from .routes.main_routes import main_bp
 
         app.register_blueprint(main_bp)
         app.register_blueprint(api_bp)

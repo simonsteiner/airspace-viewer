@@ -3,7 +3,6 @@
 from flask import Blueprint, jsonify
 from services.airspace_service import get_airspace_service
 
-
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
 
