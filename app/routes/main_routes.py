@@ -3,13 +3,14 @@
 import json
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from services.airspace_service import get_airspace_service
-from utils.airspace_colors import (
+
+from app.services.airspace_service import get_airspace_service
+from app.utils.airspace_colors import (
     generate_complete_css,
     generate_javascript_colors,
     get_legend_data,
 )
-from utils.file_utils import allowed_file, cleanup_temp_file, get_secure_filepath
+from app.utils.file_utils import allowed_file, cleanup_temp_file, get_secure_filepath
 
 main_bp = Blueprint("main", __name__)
 
