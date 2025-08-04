@@ -2,7 +2,15 @@
 
 import json
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    Response,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
 from app.services.airspace_service import get_airspace_service
 from app.utils.airspace_colors import (
@@ -25,19 +33,40 @@ def health_check():
 def index():
     """Render the main page with airspace map."""
     service = get_airspace_service()
-    airspaces, geojson = service.get_cached_data()
+    airspaces, _ = service.get_cached_data()
     current_file = service.get_current_filename()
 
     return render_template(
         "index.html",
         title="Airspace Viewer",
         airspace_count=len(airspaces or []),
-        geojson=json.dumps(geojson),
         current_file=current_file,
         legend_data=get_legend_data(),
+    )
+
+
+@main_bp.route("/config.js")
+def js_config():
+    """Render the JavaScript configuration file."""
+    service = get_airspace_service()
+    _, geojson = service.get_cached_data()
+
+    template = render_template(
+        "js/config.js",
         airspace_colors_js=generate_javascript_colors(),
+        geojson=json.dumps(geojson),
+    )
+    return Response(template, mimetype="application/javascript")
+
+
+@main_bp.route("/airspace_colors.css")
+def css_colors():
+    """Render the airspace colors CSS file."""
+    template = render_template(
+        "css/airspace_colors.css",
         airspace_colors_css=generate_complete_css(),
     )
+    return Response(template, mimetype="text/css")
 
 
 @main_bp.route("/upload", methods=["POST"])
