@@ -83,7 +83,11 @@ def upload_file():
         flash("No file selected", "error")
         return redirect(url_for("main.index"))
 
-    if file and allowed_file(file.filename, current_app.config["ALLOWED_EXTENSIONS"]):
+    if (
+        file
+        and file.filename
+        and allowed_file(file.filename, current_app.config["ALLOWED_EXTENSIONS"])
+    ):
         # Save uploaded file to temp directory
         filepath = get_secure_filepath(
             file.filename, current_app.config["UPLOAD_FOLDER"]
