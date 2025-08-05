@@ -1,4 +1,3 @@
-
 // DOM elements
 const dropzone = document.getElementById("dropzone");
 

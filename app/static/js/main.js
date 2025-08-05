@@ -1,4 +1,3 @@
-
 // Initialize everything
 document.addEventListener('DOMContentLoaded', () => {
     addAirspaces();

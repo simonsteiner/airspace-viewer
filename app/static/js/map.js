@@ -1,7 +1,5 @@
-
 // DOM elements
 const mapdiv = document.getElementById("map");
-const airspaceinfo = document.getElementById("airspaceinfo");
 
 // Initialize the map centered on Switzerland
 const map = L.map('map').setView([46.8182, 8.2275], 8);
