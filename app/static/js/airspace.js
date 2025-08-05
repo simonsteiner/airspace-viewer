@@ -1,3 +1,5 @@
+// DOM elements
+const airspaceinfo = document.getElementById("airspaceinfo");
 
 // Styling constants
 const defaultWeight = 2;
@@ -15,6 +17,19 @@ function getAirspaceColor(airspaceClass) {
     return AIRSPACE_COLORS[airspaceClass] || DEFAULT_AIRSPACE_COLOR;
 }
 
+// Generate airspace info HTML (used for both popup and info panel)
+function generateAirspaceInfoHTML(props) {
+    return `
+        <div>
+            <h6 class="airspace-class class-${props.class}">${props.name}<br>Class ${props.class}</h6>
+            <p>
+                <strong>Lower:</strong> ${props.lowerBound}<br>
+                <strong>Upper:</strong> ${props.upperBound}
+            </p>
+        </div>
+    `;
+}
+
 // Highlight airspace function
 function highlightAirspace(airspace) {
     return function (e) {
@@ -23,13 +38,8 @@ function highlightAirspace(airspace) {
             weight: highlightedWeight,
         });
 
-        const nameEl = airspaceinfo.querySelector('.name');
-        const classEl = airspaceinfo.querySelector('.class');
-        const boundsEl = airspaceinfo.querySelector('.bounds');
-
-        nameEl.innerText = airspace.name;
-        classEl.innerHTML = `<span class="airspace-class class-${airspace.class}">Class ${airspace.class}</span>`;
-        boundsEl.innerText = `From ${airspace.lowerBound} to ${airspace.upperBound}`;
+        // Use the same HTML as popup for the info panel
+        airspaceinfo.innerHTML = generateAirspaceInfoHTML(airspace);
         airspaceinfo.classList.remove('hidden');
     };
 }
@@ -70,16 +80,8 @@ function onEachFeature(feature, layer) {
     layer.addEventListener('mouseout', resetHighlight);
     layer.addEventListener('click', zoomToAirspace);
 
-    // Popup content
-    const popupContent = `
-        <div>
-            <h6>${props.name}</h6>
-            <p><span class="airspace-class class-${props.class}">${props.class}</span></p>
-            <p><strong>Lower:</strong> ${props.lowerBound}<br>
-            <strong>Upper:</strong> ${props.upperBound}</p>
-        </div>
-    `;
-
+    // Popup content (use the same function as highlight)
+    const popupContent = generateAirspaceInfoHTML(props);
     layer.bindPopup(popupContent);
 }
 
