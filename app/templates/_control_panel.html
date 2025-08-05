@@ -1,0 +1,15 @@
+<div class="control-panel minimized" id="controlPanel">
+    <div class="control-header" onclick="toggleControlPanel()">
+        <h6>📁 File Upload</h6>
+        <button class="toggle-btn" id="toggleBtn">▼</button>
+    </div>
+    <div class="control-content" id="controlContent">
+        <form action="/upload" method="post" enctype="multipart/form-data" class="file-upload">
+            <input type="file" class="form-control form-control-sm" name="file" accept=".txt,.air,.openair"
+                title="Upload OpenAir file" placeholder="Select file" required />
+            <button type="submit" class="btn btn-primary btn-sm mt-2">
+                Upload
+            </button>
+        </form>
+    </div>
+</div>

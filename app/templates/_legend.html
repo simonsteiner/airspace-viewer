@@ -1,0 +1,9 @@
+<div class="legend">
+    <h6>Airspace Classes</h6>
+    {% for item in legend_data %}
+    <div class="legend-item">
+        <div class="legend-color" style="background: {{ item.color }};"></div>
+        <span>{{ item.name }}</span>
+    </div>
+    {% endfor %}
+</div>

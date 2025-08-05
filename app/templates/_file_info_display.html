@@ -1,0 +1,17 @@
+<div class="file-info-display" id="fileInfoDisplay">
+    <div class="file-info-content">
+        <span class="file-info-item">
+            📁 <strong>{{ current_file }}</strong>
+        </span>
+        <span class="file-info-separator">•</span>
+        <span class="file-info-item">
+            📊 <strong>{{ airspace_count }}</strong> airspaces
+        </span>
+        {% if current_file != 'Switzerland.txt' %}
+        <span class="file-info-separator">•</span>
+        <span class="file-info-item">
+            <a href="/reset" class="reset-link">Reset</a>
+        </span>
+        {% endif %}
+    </div>
+</div>
