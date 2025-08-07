@@ -172,6 +172,85 @@
     overflow-y: auto;
 }
 
+#example-menu {
+    background: white;
+    border-radius: 8px;
+    bottom: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    gap: 0;
+    left: auto;
+    margin: 20px 0;
+    padding: 15px;
+    position: absolute;
+    right: 10px;
+    z-index: 1100;
+}
+
+#example-menu label {
+    margin: 0 8px 0 0;
+    font-weight: 500;
+    color: #333;
+}
+
+#example-menu select {
+    flex: 1 1 auto;
+    min-width: 220px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+}
+
+#example-menu button {
+    transition: all 0.3s ease-in-out;
+    font-size: 13px;
+    border-radius: 4px;
+}
+#example-menu.minimized {
+    padding: 10px;
+    min-width: auto;
+}
+
+#example-menu .example-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+#example-menu .toggle-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+    margin-left: 8px;
+}
+
+#example-menu .toggle-btn:hover {
+    color: #333;
+}
+
+#example-menu .example-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    transition: all 0.3s ease-in-out;
+}
+
+#example-menu.minimized .example-content {
+    display: none !important;
+}
+
 .legend-item {
     display: flex;
     align-items: center;
@@ -323,6 +402,31 @@ footer a:hover {
         width: calc(100% - 20px);
         max-width: 350px;
         backdrop-filter: blur(5px);
+    }
+
+    #example-menu {
+        position: absolute;
+        bottom: 80px;
+        right: 10px;
+        left: auto;
+        max-width: calc(50% - 15px);
+        padding: 10px;
+        font-size: 11px;
+        flex-wrap: wrap;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(5px);
+    }
+    #example-menu label {
+        font-size: 11px;
+    }
+    #example-menu select {
+        font-size: 11px;
+        min-width: 80px;
+    }
+    #example-menu button {
+        font-size: 11px;
+        padding: 4px 8px;
     }
 
     .main-header h1 {
@@ -514,6 +618,24 @@ footer a:hover {
     .main-header {
         padding: 8px 12px;
         width: calc(100% - 16px);
+    }
+
+    #example-menu {
+        max-width: calc(60% - 15px);
+        padding: 8px;
+        font-size: 10px;
+        gap: 4px;
+    }
+    #example-menu label {
+        font-size: 10px;
+    }
+    #example-menu select {
+        font-size: 10px;
+        min-width: 60px;
+    }
+    #example-menu button {
+        font-size: 10px;
+        padding: 3px 6px;
     }
 
     .main-header h1 {

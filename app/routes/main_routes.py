@@ -1,14 +1,17 @@
 """Main web routes for the Airspace Viewer Flask application."""
 
 import json
+import os
 
 from flask import (
     Blueprint,
     Response,
     flash,
+    jsonify,
     redirect,
     render_template,
     request,
+    send_file,
     url_for,
 )
 
@@ -21,6 +24,31 @@ from app.utils.airspace_colors import (
 from app.utils.file_utils import allowed_file, cleanup_temp_file, get_secure_filepath
 
 main_bp = Blueprint("main", __name__)
+
+
+@main_bp.route("/examples/list")
+def list_examples():
+    """Return a list of available example files."""
+    examples_dir = os.path.join(os.path.dirname(__file__), "../examples")
+    files = [
+        f
+        for f in os.listdir(examples_dir)
+        if os.path.isfile(os.path.join(examples_dir, f))
+    ]
+    files.sort()
+    return jsonify(files)
+
+
+@main_bp.route("/examples/get/<filename>")
+def get_example_file(filename):
+    """Return the content of the selected example file."""
+    examples_dir = os.path.join(os.path.dirname(__file__), "../examples")
+    safe_path = os.path.normpath(os.path.join(examples_dir, filename))
+    if not safe_path.startswith(os.path.abspath(examples_dir)):
+        return "Invalid file path", 400
+    if not os.path.isfile(safe_path):
+        return "File not found", 404
+    return send_file(safe_path)
 
 
 @main_bp.route("/health")

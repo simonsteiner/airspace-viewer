@@ -45,6 +45,20 @@
 
     <!-- Legend -->
     {% include '_legend.html' %}
+
+    <!-- Example file menu -->
+    <div id="example-menu" class="minimized">
+      <div class="example-header" onclick="toggleExampleMenu()">
+        <span>📁 Load Example Airspace File</span>
+        <button class="toggle-btn" id="exampleToggleBtn">▲</button>
+      </div>
+      <div class="example-content" id="exampleContent">
+        <label for="example-select">Choose file:</label>
+        <select id="example-select" data-current-file="{{ current_file|e }}"></select>
+        <button id="load-example-btn" class="btn btn-primary btn-sm">Load</button>
+      </div>
+    </div>
+
   </div>
   {% include '_footer.html' %}
 
@@ -60,6 +74,8 @@
   <script src="{{ url_for('static', filename='js/airspace.js') }}"></script>
   <script src="{{ url_for('static', filename='js/drag_and_drop.js') }}"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/example_menu.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/example_file_loader.js') }}"></script>
 </body>
 
 </html>
