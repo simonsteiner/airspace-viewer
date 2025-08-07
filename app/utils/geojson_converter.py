@@ -236,6 +236,9 @@ def _process_circle_geometry(geom: CircleGeometry) -> Optional[Dict[str, Any]]:
         if isinstance(geom.centerpoint, dict):
             center_lat = geom.centerpoint.get("lat")
             center_lng = geom.centerpoint.get("lng")
+        elif isinstance(geom.centerpoint, list):
+            center_lat = geom.centerpoint[0]  # First element is latitude
+            center_lng = geom.centerpoint[1]  # Second element is longitude
         elif hasattr(geom.centerpoint, "lat") and hasattr(geom.centerpoint, "lng"):
             center_lat = geom.centerpoint.lat
             center_lng = geom.centerpoint.lng
