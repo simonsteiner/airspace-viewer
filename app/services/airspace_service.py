@@ -54,6 +54,9 @@ class AirspaceService:
         # Use provided filepath or default Switzerland file
         if filepath is None:
             filepath = get_default_airspace_path()
+        debug_log(
+            "airspace_service", f"load_airspace_data called with filepath: {filepath}"
+        )
 
         # Only reload if filepath changed or no data cached, and the file exists
         if (
@@ -65,11 +68,19 @@ class AirspaceService:
 
                 # Use the openair library to parse the file (returns raw dictionary data)
                 raw_airspaces = parse_file(filepath)
+                debug_log(
+                    "airspace_service",
+                    f"Parsed {len(raw_airspaces)} raw airspaces from file: {filepath}",
+                )
 
                 # Convert raw data to typed Airspace objects
                 self._cached_airspaces = [
                     convert_raw_airspace(raw_data) for raw_data in raw_airspaces
                 ]
+                debug_log(
+                    "airspace_service",
+                    f"Converted to {len(self._cached_airspaces)} typed airspaces.",
+                )
                 self._current_filename = filepath
 
                 # Convert to GeoJSON for web display
@@ -167,9 +178,14 @@ class AirspaceService:
         Returns:
             tuple: (list of Airspace objects, GeoJSON dict)
         """
+        debug_log(
+            "airspace_service",
+            f"get_cached_data called. Cached airspaces: {len(self._cached_airspaces) if self._cached_airspaces else 0}",
+        )
         if self._cached_airspaces is not None and self._cached_geojson is not None:
             return self._cached_airspaces, self._cached_geojson
         else:
+            debug_log("airspace_service", "Cache is empty, loading airspace data.")
             return self.load_airspace_data()
 
     def get_current_filename(self) -> str:
@@ -183,6 +199,32 @@ class AirspaceService:
             if self._current_filename
             else "examples/Switzerland.txt"
         )
+
+    def export_to_kml(self, filepath: Optional[str] = None) -> str:
+        """Export loaded airspaces to a KML file using the kml_converter utility.
+
+        Args:
+            filepath (str, optional): Path to save the KML file. If None, returns KML as string.
+
+        Returns:
+            str: The KML as a string (if filepath is None), otherwise the filepath.
+        """
+        from app.utils.kml_converter import convert_airspace_to_kml
+
+        airspaces, _ = self.get_cached_data()
+        if not airspaces:
+            airspaces, _ = self.load_airspace_data()
+            if not airspaces:
+                raise ValueError("No airspaces loaded to export.")
+
+        kml_str = convert_airspace_to_kml(airspaces)
+
+        if filepath:
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(kml_str)
+            return filepath
+        else:
+            return kml_str
 
     def get_airspace_stats(self) -> Dict[str, Any]:
         """Get statistics about the loaded airspaces.
@@ -249,6 +291,9 @@ def get_airspace_service() -> AirspaceService:
     if airspace_service is None:
         from flask import current_app
 
-        verbose = current_app.config.get("VERBOSE", False)
+        verbose = current_app.config.get("VERBOSE", True)
+        debug_log("airspace_service", "Creating new AirspaceService instance.")
         airspace_service = AirspaceService(verbose=verbose)
+    else:
+        debug_log("airspace_service", "Reusing existing AirspaceService instance.")
     return airspace_service
