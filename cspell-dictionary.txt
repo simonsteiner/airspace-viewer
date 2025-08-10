@@ -1,6 +1,7 @@
 aabbggrr
 AARRGGBB
 airspaceinfo
+altitudemode
 amsl
 Bargen
 cpus
@@ -15,6 +16,7 @@ levelname
 linestyle
 mapdiv
 newlinestring
+newmultigeometry
 newpoint
 newpolygon
 openair
@@ -22,6 +24,7 @@ outerboundaryis
 polystyle
 PYTHONDONTWRITEBYTECODE
 PYTHONUNBUFFERED
+relativetoground
 RRGGBB
 simplekml
 superfly
