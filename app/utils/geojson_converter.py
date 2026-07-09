@@ -15,6 +15,7 @@ from app.model.openair_types import (
     PolygonGeometry,
 )
 from app.utils.airspace_colors import get_airspace_color
+from app.utils.arc_utils import segment_to_points
 from app.utils.logging_utils import debug_log, error_log, info_log, warning_log
 from app.utils.units import nautical_miles_to_meters
 
@@ -171,24 +172,29 @@ def _process_polygon_geometry(
         "geojson_converter", f"  Processing polygon with {segment_count} segments"
     )
 
-    coordinates = []
+    coordinates: List[List[float]] = []
     if geom.segments is not None:
         for segment in geom.segments:
-            if isinstance(segment, Point):
-                coordinates.append(
-                    [segment.lng, segment.lat]
-                )  # GeoJSON uses [lon, lat]
-            elif isinstance(segment, (Arc, ArcSegment)):
-                # Log that we're skipping Arc/ArcSegment for now
-                warning_log(
-                    "geojson_converter",
-                    f"    Skipping {type(segment).__name__} segment (not implemented)",
-                )
-            else:
-                warning_log(
-                    "geojson_converter",
-                    f"    Unknown segment type: {type(segment).__name__}",
-                )
+            points = segment_to_points(segment)
+            if not points:
+                if isinstance(segment, (Point, Arc, ArcSegment)):
+                    warning_log(
+                        "geojson_converter",
+                        f"    {type(segment).__name__} segment produced no points"
+                        " (malformed data?) - skipping",
+                    )
+                else:
+                    warning_log(
+                        "geojson_converter",
+                        f"    Unknown segment type: {type(segment).__name__}",
+                    )
+                continue
+            for lat, lng in points:
+                coord = [lng, lat]  # GeoJSON uses [lon, lat]
+                # Avoid duplicate points where an arc endpoint repeats the
+                # preceding DP record
+                if not coordinates or coordinates[-1] != coord:
+                    coordinates.append(coord)
 
     debug_log("geojson_converter", f"  Extracted {len(coordinates)} coordinate points")
 
