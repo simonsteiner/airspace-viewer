@@ -100,11 +100,18 @@ def _add_kml_polygon_3d(
     if geom.segments is not None:
         for segment in geom.segments:
             points = segment_to_points(segment)
-            if not points and not isinstance(segment, (Point, Arc, ArcSegment)):
-                warning_log(
-                    "kml_converter",
-                    f"Unknown segment type: {type(segment).__name__}",
-                )
+            if not points:
+                if isinstance(segment, (Point, Arc, ArcSegment)):
+                    warning_log(
+                        "kml_converter",
+                        f"{type(segment).__name__} segment produced no points"
+                        " (malformed data?) - skipping",
+                    )
+                else:
+                    warning_log(
+                        "kml_converter",
+                        f"Unknown segment type: {type(segment).__name__}",
+                    )
                 continue
             for lat, lng in points:
                 coord = (lng, lat)

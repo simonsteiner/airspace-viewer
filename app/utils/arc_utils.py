@@ -21,6 +21,15 @@ ARC_STEP_DEGREES = 5.0
 
 LatLng = Tuple[float, float]
 
+# Counterclockwise direction tokens: the normalized model value and the raw
+# OpenAir record value ("V D=-")
+CCW_TOKENS = {"CCW", "-"}
+
+
+def _is_clockwise(direction: str) -> bool:
+    """True unless the direction is a known counterclockwise token."""
+    return direction.strip().upper() not in CCW_TOKENS
+
 
 def _bearing_deg(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Initial great-circle bearing from point 1 to point 2.
@@ -88,7 +97,9 @@ def _destination(
         math.sin(theta) * math.sin(delta) * math.cos(phi1),
         math.cos(delta) - math.sin(phi1) * math.sin(phi2),
     )
-    return math.degrees(phi2), math.degrees(lambda2)
+    # Normalize longitude to [-180, 180) for arcs crossing the antimeridian
+    lng2 = (math.degrees(lambda2) + 540.0) % 360.0 - 180.0
+    return math.degrees(phi2), lng2
 
 
 def _sweep_deg(angle_start: float, angle_end: float, clockwise: bool) -> float:
@@ -127,7 +138,7 @@ def interpolate_arc(arc: Arc) -> List[LatLng]:
     """
     if arc.center is None or arc.start is None or arc.end is None:
         return []
-    clockwise = arc.direction.upper() != "CCW"
+    clockwise = _is_clockwise(arc.direction)
     radius_start = _distance_m(arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng)
     radius_end = _distance_m(arc.center.lat, arc.center.lng, arc.end.lat, arc.end.lng)
     angle_start = _bearing_deg(arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng)
@@ -157,7 +168,7 @@ def interpolate_arc_segment(segment: ArcSegment) -> List[LatLng]:
     """
     if segment.center is None:
         return []
-    clockwise = segment.direction.upper() != "CCW"
+    clockwise = _is_clockwise(segment.direction)
     radius_m = nautical_miles_to_meters(segment.radius)
     sweep = _sweep_deg(segment.start_angle, segment.end_angle, clockwise)
     steps = max(2, math.ceil(abs(sweep) / ARC_STEP_DEGREES))
