@@ -20,6 +20,7 @@ from app.model.openair_types import (
     PolygonGeometry,
 )
 from app.utils.airspace_colors import get_airspace_color
+from app.utils.arc_utils import segment_to_points
 from app.utils.logging_utils import debug_log, error_log, info_log, warning_log
 from app.utils.units import feet_to_meters, nautical_miles_to_meters
 
@@ -98,18 +99,19 @@ def _add_kml_polygon_3d(
     ring2d: List[Tuple[float, float]] = []
     if geom.segments is not None:
         for segment in geom.segments:
-            if isinstance(segment, Point):
-                ring2d.append((segment.lng, segment.lat))
-            elif isinstance(segment, (Arc, ArcSegment)):
-                warning_log(
-                    "kml_converter",
-                    f"Skipping {type(segment).__name__} segment (not implemented)",
-                )
-            else:
+            points = segment_to_points(segment)
+            if not points and not isinstance(segment, (Point, Arc, ArcSegment)):
                 warning_log(
                     "kml_converter",
                     f"Unknown segment type: {type(segment).__name__}",
                 )
+                continue
+            for lat, lng in points:
+                coord = (lng, lat)
+                # Avoid duplicate points where an arc endpoint repeats the
+                # preceding DP record
+                if not ring2d or ring2d[-1] != coord:
+                    ring2d.append(coord)
 
     if len(ring2d) < 2:
         error_log(

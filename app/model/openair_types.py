@@ -267,7 +267,17 @@ def convert_raw_airspace(raw_data: Dict[str, Any]) -> Airspace:
                 radius=geom_data.get("radius", 0.0),
             )
         else:  # Polygon
-            segments = []
+
+            def parse_point(point_data) -> Optional[Point]:
+                """Parses a coordinate dict into a Point, or None if invalid."""
+                if isinstance(point_data, dict):
+                    return Point(
+                        lat=point_data.get("lat", 0.0),
+                        lng=point_data.get("lng", 0.0),
+                    )
+                return None
+
+            segments: List[PolygonSegment] = []
             for seg_data in geom_data.get("segments", []):
                 if isinstance(seg_data, dict):
                     seg_type = seg_data.get("type", "Point")
@@ -279,10 +289,29 @@ def convert_raw_airspace(raw_data: Dict[str, Any]) -> Airspace:
                                 lng=seg_data.get("lng", 0.0),
                             )
                         )
-                    # Add Arc and ArcSegment parsing as needed
+                    elif seg_type == "Arc":
+                        segments.append(
+                            Arc(
+                                type=seg_type,
+                                center=parse_point(seg_data.get("centerpoint")),
+                                start=parse_point(seg_data.get("start")),
+                                end=parse_point(seg_data.get("end")),
+                                direction=str(seg_data.get("direction", "cw")).upper(),
+                            )
+                        )
+                    elif seg_type == "ArcSegment":
+                        segments.append(
+                            ArcSegment(
+                                type=seg_type,
+                                center=parse_point(seg_data.get("centerpoint")),
+                                radius=seg_data.get("radius", 0.0),
+                                start_angle=seg_data.get("angleStart", 0.0),
+                                end_angle=seg_data.get("angleEnd", 0.0),
+                                direction=str(seg_data.get("direction", "cw")).upper(),
+                            )
+                        )
 
-            # segments is List[Point], but PolygonGeometry expects Optional[List[PolygonSegment]]
-            return PolygonGeometry(type=geom_type, segments=segments if segments else None)  # type: ignore[arg-type]
+            return PolygonGeometry(type=geom_type, segments=segments if segments else None)
 
     return Airspace(
         name=raw_data.get("name", ""),
