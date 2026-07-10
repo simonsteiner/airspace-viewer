@@ -21,6 +21,7 @@ const SideViewControl = L.Control.extend({
         btn.innerHTML = '⛰';
         btn.title = 'Toggle side view mode (click map to see the vertical airspace profile)';
         btn.setAttribute('role', 'button');
+        btn.setAttribute('aria-label', 'Toggle side view mode');
         btn.setAttribute('aria-pressed', 'false');
 
         L.DomEvent.on(btn, 'click', (e) => {
@@ -126,8 +127,13 @@ function renderSideView(latlng, ground, features, note) {
     const groundM = ground === null || ground === undefined ? null : ground;
     const g = groundM || 0;
 
-    // Sort ground-up so bar order matches the physical stack
-    const sorted = [...features].sort((a, b) => sortKeyLower(a.properties) - sortKeyLower(b.properties));
+    // Sort ground-up so bar order matches the physical stack,
+    // resolving AGL floors against the known ground elevation
+    const groundSortKey = (p) => {
+        const v = resolveAltitudeMeters(p.lowerMeters, p.lowerRef, g);
+        return v === null ? 0 : v;
+    };
+    const sorted = [...features].sort((a, b) => groundSortKey(a.properties) - groundSortKey(b.properties));
 
     // Vertical extent of the plot
     let maxFinite = 0;
