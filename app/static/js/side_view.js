@@ -101,12 +101,14 @@ function formatMeters(m) {
     return `${Math.round(m)} m`;
 }
 
-// Human-readable resolved bounds line, e.g. "GND – 2438 m AMSL"
+// Human-readable resolved bounds line, e.g. "GND – 2438 m AMSL".
+// Bounds that cannot be resolved to meters (unlimited or unknown) fall back
+// to their original text.
 function describeBounds(props, ground) {
     const lower = resolveAltitudeMeters(props.lowerMeters, props.lowerRef, ground || 0);
     const upper = resolveAltitudeMeters(props.upperMeters, props.upperRef, ground || 0);
     const lowerTxt = lower === null ? escapeHtml(props.lowerBound) : `${formatMeters(lower)} AMSL`;
-    const upperTxt = upper === null ? 'Unlimited' : `${formatMeters(upper)} AMSL`;
+    const upperTxt = upper === null ? escapeHtml(props.upperBound) : `${formatMeters(upper)} AMSL`;
     return `${escapeHtml(props.lowerBound)} &ndash; ${escapeHtml(props.upperBound)}
         <span class="sideview-resolved">(&asymp; ${lowerTxt} &ndash; ${upperTxt})</span>`;
 }
@@ -129,12 +131,10 @@ function renderSideView(latlng, ground, features, note) {
 
     // Vertical extent of the plot
     let maxFinite = 0;
-    let hasUnlimited = false;
     sorted.forEach((f) => {
         const p = f.properties;
         const lower = resolveAltitudeMeters(p.lowerMeters, p.lowerRef, g);
         const upper = resolveAltitudeMeters(p.upperMeters, p.upperRef, g);
-        if (upper === null) hasUnlimited = true;
         maxFinite = Math.max(maxFinite, lower || 0, upper || 0);
     });
     maxFinite = Math.max(maxFinite, g + 1000);
@@ -179,8 +179,13 @@ function renderSideView(latlng, ground, features, note) {
         const color = p.color || getAirspaceColor(p.class);
         const lower = resolveAltitudeMeters(p.lowerMeters, p.lowerRef, g) || 0;
         const upperRaw = resolveAltitudeMeters(p.upperMeters, p.upperRef, g);
-        const unlimited = upperRaw === null;
-        const upper = unlimited ? maxAlt : Math.min(upperRaw, maxAlt);
+        // Only a true unlimited ceiling extends to the plot top with an ∞
+        // marker; unknown/unparseable uppers get a short dashed band with "?"
+        const unlimited = p.upperRef === 'UNLIMITED';
+        const unknownUpper = !unlimited && upperRaw === null;
+        const upper = unlimited ? maxAlt
+            : unknownUpper ? Math.min(lower + 0.08 * maxAlt, maxAlt)
+                : Math.min(upperRaw, maxAlt);
 
         const x = m.left + slot * i + (slot - barW) / 2;
         const yTop = y(upper);
@@ -188,9 +193,9 @@ function renderSideView(latlng, ground, features, note) {
         const h = Math.max(yBottom - yTop, 2);
 
         svg += `<g class="sideview-bar">`;
-        svg += `<rect x="${x}" y="${yTop}" width="${barW}" height="${h}" fill="${color}" fill-opacity="0.45" stroke="${color}" stroke-width="1.5"${unlimited ? ' stroke-dasharray="4 3"' : ''}/>`;
-        if (unlimited) {
-            svg += `<text x="${x + barW / 2}" y="${yTop + 12}" text-anchor="middle" class="sideview-unlimited">&#8734;</text>`;
+        svg += `<rect x="${x}" y="${yTop}" width="${barW}" height="${h}" fill="${color}" fill-opacity="0.45" stroke="${color}" stroke-width="1.5"${unlimited || unknownUpper ? ' stroke-dasharray="4 3"' : ''}/>`;
+        if (unlimited || unknownUpper) {
+            svg += `<text x="${x + barW / 2}" y="${yTop + 12}" text-anchor="middle" class="sideview-unlimited">${unlimited ? '&#8734;' : '?'}</text>`;
         }
         // Number badge linking bar to the list below
         const badgeY = Math.max(yTop + h / 2, yTop + 10);
