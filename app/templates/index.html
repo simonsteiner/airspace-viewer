@@ -43,6 +43,9 @@
       <div class="bounds airspace-bounds"></div>
     </div>
 
+    <!-- Side view panel (hidden by default) -->
+    <div id="sideview" class="hidden"></div>
+
     <!-- Legend -->
     {% include '_legend.html' %}
 
@@ -72,6 +75,7 @@
   <script src="{{ url_for('main.js_config') }}"></script>
   <script src="{{ url_for('static', filename='js/map.js') }}"></script>
   <script src="{{ url_for('static', filename='js/airspace.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/side_view.js') }}"></script>
   <script src="{{ url_for('static', filename='js/drag_and_drop.js') }}"></script>
   <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script src="{{ url_for('static', filename='js/example_menu.js') }}"></script>
