@@ -1,0 +1,59 @@
+name: CI
+
+# Checks every pull request and push to main. Merging to main deploys
+# (fly-deploy.yml), so this is the last look a change gets before it is live.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The requires-python floor, and what the Docker image runs.
+        python-version: ['3.12', '3.14']
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - run: uv lock --check
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy
+      - name: cspell
+        run: >-
+          git ls-files -z '*.py' '*.md' '*.toml' '*.yml' '*.yaml' '*.json' '*.html' '*.js' '*.css'
+          | xargs -0 npx --yes cspell --no-progress --no-must-find-files --config cspell.json
+      - run: uv run pytest
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t airspace-viewer .
+      - name: Smoke test the image
+        run: |
+          docker run -d --name app -p 8080:8080 airspace-viewer
+          for _ in $(seq 30); do
+            curl -fsS http://localhost:8080/health && exit 0
+            sleep 1
+          done
+          docker logs app
+          exit 1
