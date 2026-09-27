@@ -119,7 +119,7 @@ def convert_airspace_to_geojson(airspaces: List[Any]) -> Dict[str, Any]:
         try:
             # Debug: Print processing info
             debug_log(
-                "geojson_converter", f"Processing airspace {i+1}/{len(airspaces)}"
+                "geojson_converter", f"Processing airspace {i + 1}/{len(airspaces)}"
             )
 
             # Convert raw data to typed Airspace object if needed

@@ -20,3 +20,5 @@ build/
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+.mypy_cache/
+.ruff_cache/

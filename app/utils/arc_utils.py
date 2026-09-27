@@ -35,8 +35,10 @@ def _bearing_deg(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Initial great-circle bearing from point 1 to point 2.
 
     Args:
-        lat1, lng1: Start point in decimal degrees.
-        lat2, lng2: End point in decimal degrees.
+        lat1: Start point latitude in decimal degrees.
+        lng1: Start point longitude in decimal degrees.
+        lat2: End point latitude in decimal degrees.
+        lng2: End point longitude in decimal degrees.
 
     Returns:
         float: Bearing in degrees, normalized to [0, 360).
@@ -55,8 +57,10 @@ def _distance_m(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     """Haversine distance between two points in meters.
 
     Args:
-        lat1, lng1: First point in decimal degrees.
-        lat2, lng2: Second point in decimal degrees.
+        lat1: First point latitude in decimal degrees.
+        lng1: First point longitude in decimal degrees.
+        lat2: Second point latitude in decimal degrees.
+        lng2: Second point longitude in decimal degrees.
 
     Returns:
         float: Distance in meters.
@@ -78,7 +82,8 @@ def _destination(
     """Great-circle destination point given start, bearing, and distance.
 
     Args:
-        lat, lng: Start point in decimal degrees.
+        lat: Start point latitude in decimal degrees.
+        lng: Start point longitude in decimal degrees.
         bearing_deg: Bearing in degrees.
         distance_m: Distance in meters.
 
@@ -139,9 +144,13 @@ def interpolate_arc(arc: Arc) -> List[LatLng]:
     if arc.center is None or arc.start is None or arc.end is None:
         return []
     clockwise = _is_clockwise(arc.direction)
-    radius_start = _distance_m(arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng)
+    radius_start = _distance_m(
+        arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng
+    )
     radius_end = _distance_m(arc.center.lat, arc.center.lng, arc.end.lat, arc.end.lng)
-    angle_start = _bearing_deg(arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng)
+    angle_start = _bearing_deg(
+        arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng
+    )
     angle_end = _bearing_deg(arc.center.lat, arc.center.lng, arc.end.lat, arc.end.lng)
     sweep = _sweep_deg(angle_start, angle_end, clockwise)
     steps = max(2, math.ceil(abs(sweep) / ARC_STEP_DEGREES))

@@ -14,31 +14,23 @@ A Python-based interactive airspace visualization tool for viewing OpenAir airsp
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.12 or higher (the Docker image and `.python-version` use 3.14)
+- [uv](https://docs.astral.sh/uv/)
 
 ### Installation and Setup
 
 ```bash
-# Clone and navigate to the project directory
 cd airspace-viewer
-
-# Create and activate a virtual environment
-python3 -m venv .venv
-# (Optional) If Python 3.13 is installed, create virtual environment with:
-python3.13 -m venv .venv
-
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies (inside the virtual environment)
-pip install --upgrade pip
-# Install the package in editable mode with all development dependencies
-pip install -e ".[dev]"
+# Creates .venv and installs the app with its dev tools from uv.lock
+uv sync
+# Install the git hooks (once per clone)
+uv run lefthook install
 ```
 
 ### Running the Application
 
 ```bash
-python application.py
+uv run python application.py   # dev server on http://localhost:8000
 ```
 
 ## Architecture
@@ -61,15 +53,12 @@ python application.py
 - `/api/airspaces`: GeoJSON airspace data
 - `/upload`: File upload handler
 
-## Development vs Production
-
-- **Development**: Use `pip install -e .` for editable installation with local changes
-- **Production**: Use `pip freeze > requirements.txt` to lock dependency versions for deployment
-
 ## Dependencies
 
-- **Python**: `flask`, `openair`, `werkzeug`
-- **Frontend**: `leaflet`, `bootstrap`
+- **Python**: `flask`, `openair-rs-py`, `simplekml`, `werkzeug`, `gunicorn` (declared in `pyproject.toml`, locked in `uv.lock`)
+- **Frontend**: `leaflet`, `bootstrap` (loaded from CDNs in the templates, with SRI hashes)
+
+Add a dependency with `uv add <package>` (or `uv add --dev <package>` for a dev tool); both update `uv.lock`, which is committed.
 
 ## Deployment
 
@@ -139,25 +128,16 @@ Set the generated token as `FLY_API_TOKEN` secret in your GitHub repository sett
 
 ---
 
-## Code Quality & Formatting
+## Code Quality & Testing
 
-To keep the codebase clean and consistent, use the following tools on the `app/` directory. You can run them manually, or automatically before each commit using pre-commit hooks:
+```bash
+uv run pytest                  # test suite
+uv run ruff check --fix .      # lint (pycodestyle, pyflakes, isort, Google-style docstrings)
+uv run ruff format .           # format
+uv run mypy                    # type-check (config in pyproject.toml)
+npx cspell --config cspell.json "app/**"   # spell-check
+```
 
-### Pre-commit Hook Setup
+[lefthook](https://github.com/evilmartians/lefthook) runs ruff, mypy and cspell on staged files at pre-commit and pytest at pre-push (see `lefthook.yml`). Skip with `git commit --no-verify`.
 
-1. Install pre-commit (once per machine): `pip install pre-commit`
-2. Install the hooks (once per clone): `pre-commit install`
-3. Now, every commit will automatically run:
-
-   ```bash
-   flake8 app/ --extend-ignore E501, E203
-   mypy app/
-   isort app/
-   black app/
-   pydocstyle --convention=google app/
-   npx cspell app/
-   ```
-
-You can also run all hooks manually: `pre-commit run --all-files` or specific hooks `pre-commit run cspell --all-files`
-
-If you need to skip hooks for a commit, use `git commit --no-verify`.
+CI (`.github/workflows/ci.yml`) runs the same checks on every pull request and push to `main`, on Python 3.12 and 3.14, and builds the Docker image. Pushing to `main` deploys to Fly.io (`.github/workflows/fly-deploy.yml`).

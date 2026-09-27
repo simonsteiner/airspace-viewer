@@ -53,7 +53,7 @@ def convert_airspace_to_kml(airspaces: List[Any]) -> str:
     info_log("kml_converter", f"Converting {len(airspaces)} airspaces to KML")
     for i, airspace_data in enumerate(airspaces):
         try:
-            debug_log("kml_converter", f"Processing airspace {i+1}/{len(airspaces)}")
+            debug_log("kml_converter", f"Processing airspace {i + 1}/{len(airspaces)}")
             if isinstance(airspace_data, dict):
                 from app.model.openair_types import convert_raw_airspace
 
