@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Mapping, Optional, Union
 
 
 class AltitudeType(Enum):
@@ -218,11 +218,76 @@ class Airspace:
         self.class_ = value
 
 
-def convert_raw_airspace(raw_data: Dict[str, Any]) -> Airspace:
+# openair-rs-py >= 0.2 returns the raw ``AC`` token as ``class``. Colors, the
+# legend and labels are keyed on the names 0.1.x returned instead, so legacy
+# tokens are mapped back to those names. "A"-"G" and "CTR" are unchanged; any
+# token not listed here is shown as-is (and drawn in the default color).
+LEGACY_CLASS_NAMES: Dict[str, str] = {
+    "OTHER": "Other",
+    "P": "Prohibited",
+    "R": "Restricted",
+    "Q": "Danger",
+    "GP": "GliderProhibited",
+    "W": "WaveWindow",
+    "RMZ": "RadioMandatoryZone",
+    "TMZ": "TransponderMandatoryZone",
+    "NOTAM": "Notam",
+    "NOTAM ref": "NotamRef",
+    "NOTAMREF": "NotamRef",
+    "ZSM": "Zsm",
+    "FFVL": "Ffvl",
+    "FFVP": "Ffvp",
+    "SIV": "Siv",
+    "RAS": "Ras",
+    "ADIZ": "Adiz",
+    "AMA": "Ama",
+    "PART": "Part",
+    "FIR": "Fir",
+    "UIR": "Uir",
+    "OCA": "Oca",
+    "POLITICAL": "Political",
+    "NO-FIR": "NoFir",
+    "NOFIR": "NoFir",
+}
+
+# OpenAir v2 files write "AC UNC" plus the kind of area in "AY". For the "AY"
+# tokens that openair's ``normalize_legacy_classes`` derives from a legacy "AC"
+# token, use the class that legacy token is shown as, so both spellings of the
+# same airspace look alike.
+UNCLASSIFIED_TYPE_CLASSES: Dict[str, str] = {
+    "CTR": "CTR",
+    "R": "Restricted",
+    "Q": "Danger",
+    "P": "Prohibited",
+    "OFR": "GliderProhibited",
+    "GSEC": "WaveWindow",
+    "RMZ": "RadioMandatoryZone",
+    "TMZ": "TransponderMandatoryZone",
+}
+
+
+def display_class(raw_data: Mapping[str, Any]) -> str:
+    """Return the class an airspace is shown as.
+
+    Args:
+        raw_data (Mapping[str, Any]): An airspace dict as returned by ``openair``.
+
+    Returns:
+        str: The legacy class name for legacy ``AC`` tokens (e.g. ``"R"`` ->
+            ``"Restricted"``), the class derived from ``AY`` for ``AC UNC``
+            when it has one, and otherwise the raw ``AC`` token.
+    """
+    token = str(raw_data.get("class") or "")
+    if token == "UNC":
+        return UNCLASSIFIED_TYPE_CLASSES.get(str(raw_data.get("type") or ""), token)
+    return LEGACY_CLASS_NAMES.get(token, token)
+
+
+def convert_raw_airspace(raw_data: Mapping[str, Any]) -> Airspace:
     """Converts a raw dictionary to an Airspace object.
 
     Args:
-        raw_data (Dict[str, Any]): The raw airspace data as a dictionary.
+        raw_data (Mapping[str, Any]): The raw airspace data as a dictionary.
 
     Returns:
         Airspace: The constructed Airspace object.
@@ -314,8 +379,9 @@ def convert_raw_airspace(raw_data: Dict[str, Any]) -> Airspace:
             return PolygonGeometry(type=geom_type, segments=segments if segments else None)
 
     return Airspace(
-        name=raw_data.get("name", ""),
-        class_=raw_data.get("class", ""),
+        # openair-rs-py >= 0.2 returns None for an airspace without "AN"
+        name=raw_data.get("name") or "",
+        class_=display_class(raw_data),
         lower_bound=parse_altitude(raw_data.get("lowerBound", {})),
         upper_bound=parse_altitude(raw_data.get("upperBound", {})),
         geom=parse_geometry(raw_data.get("geom", {})),
