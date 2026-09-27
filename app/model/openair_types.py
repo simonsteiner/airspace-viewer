@@ -376,7 +376,9 @@ def convert_raw_airspace(raw_data: Mapping[str, Any]) -> Airspace:
                             )
                         )
 
-            return PolygonGeometry(type=geom_type, segments=segments if segments else None)
+            return PolygonGeometry(
+                type=geom_type, segments=segments if segments else None
+            )
 
     return Airspace(
         # openair-rs-py >= 0.2 returns None for an airspace without "AN"

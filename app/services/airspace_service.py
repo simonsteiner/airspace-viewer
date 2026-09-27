@@ -62,7 +62,6 @@ class AirspaceService:
         if (
             self._cached_airspaces is None or self._current_filename != filepath
         ) and os.path.exists(filepath):
-
             try:
                 info_log("airspace_service", f"Loading airspace data from: {filepath}")
 

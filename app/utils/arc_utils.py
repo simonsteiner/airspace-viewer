@@ -144,9 +144,13 @@ def interpolate_arc(arc: Arc) -> List[LatLng]:
     if arc.center is None or arc.start is None or arc.end is None:
         return []
     clockwise = _is_clockwise(arc.direction)
-    radius_start = _distance_m(arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng)
+    radius_start = _distance_m(
+        arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng
+    )
     radius_end = _distance_m(arc.center.lat, arc.center.lng, arc.end.lat, arc.end.lng)
-    angle_start = _bearing_deg(arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng)
+    angle_start = _bearing_deg(
+        arc.center.lat, arc.center.lng, arc.start.lat, arc.start.lng
+    )
     angle_end = _bearing_deg(arc.center.lat, arc.center.lng, arc.end.lat, arc.end.lng)
     sweep = _sweep_deg(angle_start, angle_end, clockwise)
     steps = max(2, math.ceil(abs(sweep) / ARC_STEP_DEGREES))
