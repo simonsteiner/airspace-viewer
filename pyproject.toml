@@ -47,6 +47,9 @@ Repository = "https://github.com/simonsteiner/airspace-viewer"
 [tool.setuptools.packages.find]
 include = ["app*"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.ruff]
 line-length = 88
 target-version = "py312"
@@ -68,7 +71,7 @@ known-first-party = ["app"]
 "tests/**" = ["D"]
 
 [tool.mypy]
-files = ["app", "application.py"]
+files = ["app", "tests", "application.py"]
 warn_return_any = true
 warn_unused_configs = true
 check_untyped_defs = true

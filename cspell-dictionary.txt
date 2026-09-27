@@ -6,6 +6,7 @@ altitudemode
 amsl
 antimeridian
 asymp
+autouse
 Bargen
 cpus
 Danilo
@@ -43,4 +44,5 @@ RRGGBB
 sideview
 simplekml
 superfly
+testpaths
 unparseable
