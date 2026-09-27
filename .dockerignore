@@ -3,3 +3,8 @@ fly.toml
 __pycache__/
 .envrc
 .venv/
+.github/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/
