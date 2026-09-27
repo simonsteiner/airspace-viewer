@@ -46,3 +46,34 @@ Repository = "https://github.com/simonsteiner/airspace-viewer"
 
 [tool.setuptools.packages.find]
 include = ["app*"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+# E/W/F: pycodestyle + pyflakes (flake8), I: isort, D: pydocstyle
+select = ["E", "W", "F", "I", "D"]
+# E501 (line too long) is handled by the formatter
+ignore = ["E501"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests don't need the full pydocstyle docstring conventions
+"tests/**" = ["D"]
+
+[tool.mypy]
+files = ["app", "application.py"]
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+# simplekml ships no type information
+module = ["simplekml"]
+ignore_missing_imports = true

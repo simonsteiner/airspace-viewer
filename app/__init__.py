@@ -12,7 +12,7 @@ import os
 from flask import Flask
 
 
-def create_app(config_name=None):
+def create_app(config_name: str | None = None) -> Flask:
     """Application factory function for the Flask app.
 
     Args:

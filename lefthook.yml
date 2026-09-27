@@ -1,0 +1,34 @@
+# Ref: https://github.com/evilmartians/lefthook
+# Install the git hooks with: uv run lefthook install
+
+pre-commit:
+  parallel: true
+  commands:
+    ruff-check:
+      priority: 1
+      glob: "*.py"
+      run: uv run ruff check --fix {staged_files}
+      stage_fixed: true
+
+    ruff-format:
+      priority: 2
+      glob: "*.py"
+      run: uv run ruff format {staged_files}
+      stage_fixed: true
+
+    mypy:
+      priority: 3
+      glob: "*.py"
+      run: uv run mypy
+
+    cspell:
+      priority: 4
+      glob: "*.{py,md,toml,yml,yaml,json,html,js,css}"
+      exclude:
+        - "app/examples/**"
+      run: npx --yes cspell --no-progress --no-must-find-files --config cspell.json {staged_files}
+
+pre-push:
+  commands:
+    pytest:
+      run: uv run pytest
