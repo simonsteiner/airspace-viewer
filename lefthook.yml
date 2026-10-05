@@ -21,8 +21,15 @@ pre-commit:
       glob: "*.py"
       run: uv run mypy
 
-    cspell:
+    # The only fixer of *.md, so it can run beside cspell. Config in .rumdl.toml.
+    rumdl:
       priority: 4
+      glob: "*.md"
+      run: uv run rumdl check --fix {staged_files}
+      stage_fixed: true
+
+    cspell:
+      priority: 5
       glob: "*.{py,md,toml,yml,yaml,json,html,js,css}"
       exclude:
         - "app/examples/**"

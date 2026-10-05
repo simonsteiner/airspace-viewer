@@ -136,8 +136,9 @@ uv run ruff check --fix .      # lint (pycodestyle, pyflakes, isort, Google-styl
 uv run ruff format .           # format
 uv run mypy                    # type-check (config in pyproject.toml)
 npx cspell --config cspell.json "app/**"   # spell-check
+uv run rumdl check .           # Markdown lint (config in .rumdl.toml)
 ```
 
-[lefthook](https://github.com/evilmartians/lefthook) runs ruff, mypy and cspell on staged files at pre-commit and pytest at pre-push (see `lefthook.yml`). Skip with `git commit --no-verify`.
+[lefthook](https://github.com/evilmartians/lefthook) runs ruff, mypy, rumdl (Markdown) and cspell on staged files at pre-commit and pytest at pre-push (see `lefthook.yml`). Skip with `git commit --no-verify`.
 
 CI (`.github/workflows/ci.yml`) runs the same checks on every pull request and push to `main`, on Python 3.12 and 3.14, and builds the Docker image. Pushing to `main` deploys to Fly.io (`.github/workflows/fly-deploy.yml`).
