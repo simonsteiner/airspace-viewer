@@ -29,7 +29,7 @@ pre-commit:
       stage_fixed: true
 
     cspell:
-      priority: 5
+      priority: 4
       glob: "*.{py,md,toml,yml,yaml,json,html,js,css}"
       exclude:
         - "app/examples/**"
