@@ -22,9 +22,10 @@ uv run ruff check --fix .            # lint + autofix
 uv run ruff format .                 # format
 uv run mypy                          # type-check (config in pyproject.toml)
 npx cspell --config cspell.json "app/**"   # spell-check
+uv run rumdl check .                 # Markdown lint (config in .rumdl.toml)
 ```
 
-`ruff`, `mypy` and `cspell` run on staged files at **pre-commit**; `pytest` runs at **pre-push** (see `lefthook.yml`). CI (`.github/workflows/ci.yml`) runs all of them on Python 3.12 and 3.14 plus `docker build`.
+`ruff`, `mypy`, `rumdl` and `cspell` run on staged files at **pre-commit**; `pytest` runs at **pre-push** (see `lefthook.yml`). CI (`.github/workflows/ci.yml`) runs all of them on Python 3.12 and 3.14 plus `docker build`.
 
 ## Architecture
 

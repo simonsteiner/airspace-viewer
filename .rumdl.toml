@@ -1,0 +1,6 @@
+# Ref: https://rumdl.dev/ — the Markdown linter lefthook, CI and the VS Code
+# extension (rvben.rumdl) all read this file.
+
+[global]
+# README.md and CLAUDE.md keep one paragraph per line; they don't wrap prose.
+disable = ["MD013"]
