@@ -14,7 +14,7 @@ uv run pytest tests/test_routes.py  # run one test file
 uv run ruff check --fix .  # lint and autofix
 uv run ruff format .  # format
 uv run mypy  # type-check app, tests and application.py
-npx --yes cspell --no-progress --config cspell.json "app/**" "*.md" "docs/**"  # spell-check code and docs
+git ls-files -z '*.py' '*.md' '*.toml' '*.yml' '*.yaml' '*.json' '*.html' '*.js' '*.css' | xargs -0 npx --yes cspell --no-progress --no-must-find-files --config cspell.json  # spell-check what CI checks
 npx --yes cspell --no-progress --config cspell.json README.md  # spell-check one file
 docker build -t airspace-viewer .  # build the production image
 ```
