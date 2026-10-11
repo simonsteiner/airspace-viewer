@@ -36,6 +36,7 @@ jobs:
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy
+      - run: uv run rumdl check .
       - name: cspell
         run: >-
           git ls-files -z '*.py' '*.md' '*.toml' '*.yml' '*.yaml' '*.json' '*.html' '*.js' '*.css'

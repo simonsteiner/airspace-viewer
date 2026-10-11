@@ -4,6 +4,7 @@ ADIZ
 airspaceinfo
 altitudemode
 amsl
+Anson
 antimeridian
 asymp
 autouse
@@ -43,6 +44,8 @@ PYTHONDONTWRITEBYTECODE
 PYTHONUNBUFFERED
 relativetoground
 RRGGBB
+rumdl
+rvben
 sideview
 simplekml
 superfly
