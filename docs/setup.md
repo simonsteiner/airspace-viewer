@@ -35,7 +35,8 @@ uv run pytest                  # test suite
 uv run ruff check --fix .      # lint (pycodestyle, pyflakes, isort, Google-style docstrings)
 uv run ruff format .           # format
 uv run mypy                    # type-check (config in pyproject.toml)
-npx --yes cspell --no-progress --config cspell.json "app/**" "*.md" "docs/**"   # spell-check
+git ls-files -z '*.py' '*.md' '*.toml' '*.yml' '*.yaml' '*.json' '*.html' '*.js' '*.css' \
+  | xargs -0 npx --yes cspell --no-progress --no-must-find-files --config cspell.json   # spell-check, as CI runs it
 uv run rumdl check .           # Markdown lint (config in .rumdl.toml)
 ```
 
