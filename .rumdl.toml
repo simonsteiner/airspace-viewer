@@ -2,5 +2,5 @@
 # extension (rvben.rumdl) all read this file.
 
 [global]
-# README.md and CLAUDE.md keep one paragraph per line; they don't wrap prose.
+# Markdown docs keep one paragraph per line; they don't wrap prose.
 disable = ["MD013"]
