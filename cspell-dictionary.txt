@@ -13,6 +13,7 @@ codegen
 conftest
 cpus
 Danilo
+delenv
 Disentis
 docstrings
 envrc
@@ -43,6 +44,7 @@ openair
 outerboundaryis
 Podfile
 polystyle
+protoc
 pubspec
 PYTHONDONTWRITEBYTECODE
 PYTHONUNBUFFERED
