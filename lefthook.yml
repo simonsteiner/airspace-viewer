@@ -31,12 +31,16 @@ pre-commit:
         - "app/examples/**"
       run: npx --yes cspell --no-progress --no-must-find-files --config cspell.json {staged_files}
 
+# In commit-msg, not pre-commit: git runs it after pre-commit's fixers have
+# re-staged their output, so it checks what will actually be committed.
+commit-msg:
+  commands:
     # Every staged file an agent writes stays under 5,000 tokens (bytes / 4), so
     # an agent can read it whole. Lockfiles, build output, binaries and generated
     # files are skipped; mark more with linguist-generated in .gitattributes.
     # On failure it prints how to split the file.
     file-tokens:
-      run: python3 scripts/hooks/check-file-tokens.py --max-tokens 5000 {staged_files}
+      run: python3 scripts/hooks/check-file-tokens.py --max-tokens 5000 -- {staged_files}
 
 pre-push:
   commands:
