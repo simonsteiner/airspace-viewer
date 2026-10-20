@@ -9,9 +9,11 @@ antimeridian
 asymp
 autouse
 Bargen
+codegen
 conftest
 cpus
 Danilo
+delenv
 Disentis
 docstrings
 envrc
@@ -27,6 +29,7 @@ latlng
 lefthook
 levelname
 linestyle
+lockfiles
 mapdiv
 middot
 ndash
@@ -39,7 +42,10 @@ NOTAM
 NOTAMREF
 openair
 outerboundaryis
+Podfile
 polystyle
+protoc
+pubspec
 PYTHONDONTWRITEBYTECODE
 PYTHONUNBUFFERED
 relativetoground
@@ -50,5 +56,6 @@ sideview
 simplekml
 superfly
 testpaths
+topojson
 unparseable
 WSGI

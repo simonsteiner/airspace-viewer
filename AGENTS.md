@@ -20,7 +20,7 @@ uv run rumdl check .  # lint Markdown (config in .rumdl.toml)
 docker build -t airspace-viewer .  # build the production image
 ```
 
-Use `uv`, not `pip`. `lefthook.yml` runs ruff, mypy, rumdl and cspell on staged files at pre-commit and pytest at pre-push; CI (`.github/workflows/ci.yml`) runs them all on Python 3.12 and 3.14 and smoke-tests the Docker image.
+Use `uv`, not `pip`. `lefthook.yml` runs ruff, mypy, rumdl and cspell on staged files at pre-commit, a 5,000-token-per-file budget at commit-msg and pytest at pre-push; CI (`.github/workflows/ci.yml`) runs all but the token budget on Python 3.12 and 3.14 and smoke-tests the Docker image.
 
 ## Conventions
 
