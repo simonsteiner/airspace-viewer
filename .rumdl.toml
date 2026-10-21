@@ -4,3 +4,6 @@
 [global]
 # Markdown docs keep one paragraph per line; they don't wrap prose.
 disable = ["MD013"]
+# lefthook clones its remotes into .git/info/lefthook-remotes/, and rumdl
+# doesn't skip .git on its own.
+exclude = [".git/**"]
