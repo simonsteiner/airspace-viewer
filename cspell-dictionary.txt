@@ -19,6 +19,7 @@ docstrings
 envrc
 FFVL
 FFVP
+filetokens
 FLYCTL
 gridlines
 GSEC
@@ -53,6 +54,7 @@ RRGGBB
 rumdl
 rvben
 sideview
+simonsteiner
 simplekml
 superfly
 testpaths
