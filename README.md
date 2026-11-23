@@ -17,9 +17,9 @@ The app starts with `app/examples/Switzerland.txt` loaded; **Reset** returns to 
 
 ## Docs
 
-- [docs/setup.md](docs/setup.md) — local setup, checks, Docker and troubleshooting
-- [docs/deployment.md](docs/deployment.md) — deploying to Fly.io
-- [.env.example](.env.example) — environment variables
-- [GLOSSARY.md](GLOSSARY.md) — OpenAir and airspace terms
-- [docs/adr/](docs/adr/) — design decisions
-- [AGENTS.md](AGENTS.md) — rules for changing the code (for people and coding agents)
+- [docs/setup.md](docs/setup.md): local setup, checks, Docker and troubleshooting
+- [docs/deployment.md](docs/deployment.md): deploying to Fly.io
+- [.env.example](.env.example): environment variables
+- [GLOSSARY.md](GLOSSARY.md): OpenAir and airspace terms
+- [docs/adr/](docs/adr/): design decisions
+- [AGENTS.md](AGENTS.md): rules for changing the code (for people and coding agents)

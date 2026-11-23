@@ -42,7 +42,7 @@ uv run rumdl check .           # Markdown lint (config in .rumdl.toml)
 
 [lefthook](https://github.com/evilmartians/lefthook) runs ruff, mypy, rumdl (Markdown) and cspell on staged files at pre-commit and pytest at pre-push (see `lefthook.yml`).
 
-At pre-commit it blocks any staged file over 5,000 tokens (bytes / 4) and prints how to split it (the `file-tokens` job; lefthook fetches its script from [simonsteiner/skills](https://github.com/simonsteiner/skills) on the first commit, so that one needs network). It skips lockfiles, binaries and anything `.gitattributes` marks `linguist-generated` or `linguist-vendored`, such as the OpenAir files in `app/examples/`; CI doesn't run this check. To skip the hooks once in an emergency, run `LEFTHOOK=0 git commit …`.
+At pre-commit it also runs `file-tokens` (blocks any staged file over 5,000 tokens, bytes / 4, and prints how to split it) and `dashes` (blocks em and en dashes in staged files); lefthook fetches both scripts from [simonsteiner/skills](https://github.com/simonsteiner/skills) on the first commit, so that one needs network. Both skip lockfiles, binaries and anything `.gitattributes` marks `linguist-generated` or `linguist-vendored`, such as the OpenAir files in `app/examples/`; CI doesn't run these checks. To skip the hooks once in an emergency, run `LEFTHOOK=0 git commit …`.
 
 CI (`.github/workflows/ci.yml`) runs the same checks on every pull request and push to `main`, on Python 3.12 and 3.14, checks that `uv.lock` is current, and builds and smoke-tests the Docker image.
 

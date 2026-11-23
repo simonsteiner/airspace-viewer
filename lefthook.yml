@@ -4,12 +4,12 @@
 min_version: 2.0.5 # `args:` on script jobs
 
 remotes:
-  # The shared token-budget script. A tag, never a commit SHA. Bump `ref` to
-  # update; the next commit fetches it.
+  # The shared token-budget and dash scripts. A tag, never a commit SHA. Bump
+  # `ref` to update; the next commit fetches it.
   - git_url: https://github.com/simonsteiner/skills
-    ref: filetokens.v1.0.0
+    ref: hooks.v1.0.0
     configs:
-      - lefthook/file-tokens.yml
+      - lefthook/hooks.yml
 
 pre-commit:
   parallel: true
@@ -23,6 +23,12 @@ pre-commit:
       script: check-file-tokens.py
       runner: python3
       args: --max-tokens 5000 {staged_files}
+    # No em or en dashes in the staged files: they read as machine-written. Same
+    # exemptions as file-tokens; a file that must hold them goes in `exclude:`.
+    - name: dashes
+      script: check-dashes.py
+      runner: python3
+      args: "{staged_files}"
   commands:
     # One job, not two: under `parallel: true` lefthook ignores `priority`, and
     # two fixers rewriting the same files at once undo each other's fixes.

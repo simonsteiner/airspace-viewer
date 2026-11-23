@@ -11,8 +11,8 @@ Every push to `main` deploys: `.github/workflows/fly-deploy.yml` runs `flyctl de
 
 ## Secrets
 
-- **`FLASK_SECRET_KEY`** — Fly secret, signs the Flask session (flash messages). Without it the app falls back to a hard-coded development key.
-- **`FLY_API_TOKEN`** — GitHub repository secret, used by the deploy workflow.
+- **`FLASK_SECRET_KEY`**: Fly secret, signs the Flask session (flash messages). Without it the app falls back to a hard-coded development key.
+- **`FLY_API_TOKEN`**: GitHub repository secret, used by the deploy workflow.
 
 Never put secret values in the repo; `.env.example` lists the variables without values.
 

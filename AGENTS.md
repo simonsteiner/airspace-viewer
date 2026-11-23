@@ -61,9 +61,9 @@ Use `uv`, not `pip`. `lefthook.yml` runs ruff, mypy, rumdl and cspell on staged 
 
 ## Docs
 
-- `README.md` — what the project is and the quickstart.
-- `docs/setup.md` — local setup, checks, Docker and troubleshooting.
-- `docs/deployment.md` — Fly.io deploys, secrets and scaling.
-- `.env.example` — every env var, annotated.
-- `GLOSSARY.md` — OpenAir and airspace terms; read before naming anything class- or type-related.
-- `docs/adr/` — why the code deviates from the obvious path.
+- `README.md`: what the project is and the quickstart.
+- `docs/setup.md`: local setup, checks, Docker and troubleshooting.
+- `docs/deployment.md`: Fly.io deploys, secrets and scaling.
+- `.env.example`: every env var, annotated.
+- `GLOSSARY.md`: OpenAir and airspace terms; read before naming anything class- or type-related.
+- `docs/adr/`: why the code deviates from the obvious path.
