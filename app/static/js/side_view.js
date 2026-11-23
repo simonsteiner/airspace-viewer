@@ -86,7 +86,7 @@ async function onSideViewClick(e) {
         ground = await fetchGroundElevation(latlng.lat, latlng.lng);
     } catch (err) {
         console.warn('Ground elevation lookup failed:', err);
-        note = 'Ground elevation unavailable — AGL bounds shown relative to sea level.';
+        note = 'Ground elevation unavailable; AGL bounds shown relative to sea level.';
     }
 
     // Ignore stale responses if the user clicked elsewhere meanwhile
@@ -101,7 +101,7 @@ function formatMeters(m) {
     return `${Math.round(m)} m`;
 }
 
-// Human-readable resolved bounds line, e.g. "GND – 2438 m AMSL".
+// Human-readable resolved bounds line, e.g. "GND - 2438 m AMSL".
 // Bounds that cannot be resolved to meters (unlimited or unknown) fall back
 // to their original text.
 function describeBounds(props, ground) {
@@ -201,7 +201,7 @@ function renderSideView(latlng, ground, features, note) {
         const badgeY = Math.max(yTop + h / 2, yTop + 10);
         svg += `<circle cx="${x + barW / 2}" cy="${badgeY}" r="9" fill="${color}"/>`;
         svg += `<text x="${x + barW / 2}" y="${badgeY + 3.5}" text-anchor="middle" class="sideview-badge">${i + 1}</text>`;
-        svg += `<title>${escapeHtml(p.name)} (Class ${escapeHtml(p.class)})\n${escapeHtml(p.lowerBound)} – ${escapeHtml(p.upperBound)}</title>`;
+        svg += `<title>${escapeHtml(p.name)} (Class ${escapeHtml(p.class)})\n${escapeHtml(p.lowerBound)} \u2013 ${escapeHtml(p.upperBound)}</title>`;
         svg += `</g>`;
     });
 
